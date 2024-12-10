@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="bootstrap5.min.css">
+    <link rel="stylesheet" href="index.css">-->
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap5.min.css') }}">
+    <title>HAPROXY LB</title>
+    <!-- <link rel="stylesheet" href="HA-Proxy/bootstrap/bootstrap-2.css"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='index1.css') }}">
+
+</head>
+
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar-->
+        <div class="border-end bg-white" id="sidebar-wrapper">
+            <div id="titlehead" class="sidebar-heading border-bottom bg-light">HAPROXY</div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/global">Global</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/default">Defaults</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/backend">Backend</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                    href="/frontend">Frontend</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/acl_lines">ACL</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                    href="/backend_switching_rule">Swiching rules</a>
+            </div>
+        </div>
+        <div id="page-content-wrapper">
+            <!-- Top navigation-->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <button class="btn btn-primary" id="sidebarToggle">Menu</button>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation"><span
+                            class="navbar-toggler-icon"></span></button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                            <li class="nav-item active"><a class="nav-link" id="titlehead" href="#">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" id="titlehead" href="#!">Link</a></li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false" id="titlehead">Dropdown</a>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="#!">Action</a>
+                                    <a class="dropdown-item" href="#!">Another action</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#!">Something else here</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <br />
+            <div class="container mt-5">
+                <form>
+                    <h2>ACL Rules</h2>
+                    {{ data }}
+                    <div id="aclContainer"></div>
+                    <!-- <form id="myForm">
+                    <label>Frontend:</label>
+                    <select>
+                        <option>All FrontEnd Names</option>
+                    </select>
+                    <br>
+                    <br>
+                    <label>ACL Name:</label>
+                    <input type="text" id="aclInput" placeholder="Enter ACL Name">
+                    <br>
+                    <br>
+                    <label>Criteria:</label>
+                    <select>
+                        <option value="select">--Select Paths--</option>
+                        <option value="IP based">IP based</option>
+                        <option value="Request based">Request based</option>
+                        <option value="URL based">URL based</option>
+                        <option value="Header based">Header based</option>
+                        <option value="SSL">SSL</option>
+                    </select>
+                    <br>
+                    <br>
+                    <label>Value:</label>
+                    <input type="text" placeholder="Enter Value"> -->
+
+                    <button class="btn btn-primary" type="button" id="submitBtn">Save</button>
+                </form>
+
+                <br>
+
+                <!--<pre id="jsonOutput"></pre>-->
+
+                <script>
+                    var my_data = '{{ data }}';
+
+                    function decodeEntities(encodedString) {
+                        const textArea = document.createElement('textarea');
+                        textArea.innerHTML = encodedString;
+                        return textArea.value;
+                    }
+
+                    const decodedData = decodeEntities(my_data);
+                    const jsonData = JSON.parse(decodedData);
+
+                    const jsonData2 = {
+                        "acl_name": "is-blocked-ip",
+                        "criterion": "src",
+                        "index": 0,
+                        "value": "-f /etc/haproxy/blocklisted.ips"
+                    };
+
+
+                    for (let i = 0; i < 1; i++) {
+
+                        const containerDiv = document.createElement('div');
+                        containerDiv.classList.add('content-box');
+
+                        const frontend = jsonData;
+                        const acl = jsonData[i].acl;
+
+                        const frontendLabel = document.createElement('label');
+                        frontendLabel.textContent = "FrontEnd : ";
+
+                        const frontendInput = document.createElement("input");
+                        frontendInput.type = "text";
+                        frontendInput.classList.add("form-control")
+                        frontendInput.disabled = true;
+
+                        var y = 0;
+                        frontend.map((x, index) => {
+                            if (x.frontend.name === "f_new") {
+                                y = index;
+                            }
+                        })
+                        //console.log("frontendValue",frotendvalue);
+                        frontendInput.value = jsonData[y].frontend.name
+
+                        frontendInput.addEventListener('input', function () {
+                            event.preventDefault();
+                            newJsonData[i].frontend.name = frontendInput.value
+                        })
+
+                        // const aclNameLabel = document.createElement('label');
+                        // aclNameLabel.textContent = " Enter ACL Name";
+
+                        // const inputfield = document.createElement('input');
+                        // inputfield.type = "text";
+                        // inputfield.value = jsonData[0].acl.data[0].name;
+                        // inputfield.classList.add("form-control");
+
+                        // inputfield.addEventListener('input', function () {
+                        //     acl.data[y].name = inputfield.value
+                        // })
+
+                        for (let j = 0; j < jsonData[y].bind.data.length; j++) {
+                            const aclNameLabel = document.createElement('label');
+                            aclNameLabel.textContent = "ACL Name: ";
+
+                            const aclNameInput = document.createElement("input");
+                            aclNameInput.type = "text";
+                            aclNameInput.classList.add("form-control");
+                            aclNameInput.value = jsonData2["acl_name"];
+                            aclNameInput.addEventListener('input', function () {
+                                jsonData2["acl_name"] = aclNameInput.value;
+                            });
+
+                            const criterionLabel = document.createElement('label');
+                            criterionLabel.textContent = "Criterion: ";
+
+                            const criterionInput = document.createElement("input");
+                            criterionInput.type = "text";
+                            criterionInput.classList.add("form-control");
+                            criterionInput.value = jsonData2["criterion"];
+                            criterionInput.addEventListener('input', function () {
+                                jsonData2["criterion"] = criterionInput.value;
+                            });
+
+                            const indexLabel = document.createElement('label');
+                            indexLabel.textContent = "Index: ";
+
+                            const indexInput = document.createElement("input");
+                            indexInput.type = "text";
+                            indexInput.classList.add("form-control");
+                            indexInput.value = jsonData2["index"];
+                            indexInput.addEventListener('input', function () {
+                                jsonData2["index"] = indexInput.value;
+                            });
+
+                            const valueLabel = document.createElement('label');
+                            valueLabel.textContent = "Value: ";
+
+                            const valueInput = document.createElement("input");
+                            valueInput.type = "text";
+                            valueInput.classList.add("form-control");
+                            valueInput.value = jsonData2["value"];
+                            valueInput.addEventListener('input', function () {
+                                jsonData2["value"] = valueInput.value;
+                            });
+
+                            // Append labels and input fields to the container div
+
+                            const addBindButton = document.createElement('button');
+                            addBindButton.textContent = '+';
+                            addBindButton.classList.add('btn', 'btn-success', 'mb-2');
+                            addBindButton.addEventListener('click', function () {
+                                event.preventDefault();
+                                addBindServers(containerDiv, i, j);
+                            });
+
+                            const removeBindButton = document.createElement('button');
+                            removeBindButton.textContent = '-';
+                            removeBindButton.classList.add('btn', 'btn-danger', 'mb-2');
+                            removeBindButton.addEventListener('click', function () {
+                                event.preventDefault();
+                                fetch('/delete_bind', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ frontend: secondnewJsonData[i].data.name, bind: inputfield1a.value }), // Send the backend name to delete
+                                })
+                                    .then(response => {
+                                        if (response.status === 200) {
+                                            // Backend deleted successfully
+                                            // Handle any UI updates as needed
+                                            console.log("frontendName", secondnewJsonData[i].data.name, "BindName", inputfield1a.value);
+                                        } else if (response.status === 404) {
+                                            // Backend not found
+                                            // Handle error
+                                            console.error('Backend not found');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        // Handle other errors
+                                    });
+                                newJsonData[i].bind.splice(j, 1);
+                                wholeContainer.removeChild(bindContainer);
+                            }
+                            );
+
+
+
+                            containerDiv.appendChild(frontendLabel);
+                            containerDiv.appendChild(frontendInput);
+                            containerDiv.appendChild(addBindButton);
+                            containerDiv.appendChild(removeBindButton);
+                            containerDiv.appendChild(aclNameLabel);
+                            containerDiv.appendChild(aclNameInput);
+                            containerDiv.appendChild(criterionLabel);
+                            containerDiv.appendChild(criterionInput);
+                            containerDiv.appendChild(indexLabel);
+                            containerDiv.appendChild(indexInput);
+                            containerDiv.appendChild(valueLabel);
+                            containerDiv.appendChild(valueInput);
+                            // containerDiv.appendChild(aclNameLabel);
+                            // containerDiv.appendChild(inputfield);
+                        }
+
+
+
+
+                        // JavaScript code to handle form submission and JSON creation
+                        document.getElementById("submitBtn").addEventListener("click", function () {
+                            // Get form data
+
+                            // [{ "type":"new", "frontend": "" ,"data" = {} },{}] is-blocked-ip
+                            // backend name cannot be edited
+                            data = [
+                                {
+                                    "type": "old",
+                                    "frontend": "f_new",
+                                    "data": { "value": "/api2", "criterion": "path", "acl_name": "is-blocked-ip", "index": 0 }
+                                }
+                            ];
+
+                            data = { "frontend": "f_new", "index": 0 };
+
+                            // Display the JSON object
+                            //document.getElementById("jsonOutput").textContent = JSON.stringify(data, null, 2);
+
+                            // Send the JSON object via a POST request
+                            fetch('/delete_acl_rule', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(data)
+                            })
+                                .then(response => {
+                                    // Handle the response here if needed
+
+                                    if (response.ok) {
+                                        // Parse the JSON response
+                                        return response.json();
+                                    } else {
+                                        throw new Error('Request failed with status: ' + response.status);
+                                    }
+                                })
+                                .then(data => {
+                                    // Handle the JSON data here
+                                    console.log(data);
+                                    alert('Data Saved');
+                                })
+                                .catch(error => {
+                                    // Handle errors here if the POST request fails
+                                    alert('Fetch Error');
+                                    console.error('Error:', error);
+                                });
+                        });
+
+                        function showAlertAndRedirect() {
+                            // Show an alert
+                            //alert('Do you want to Deploy config?');
+                            if (confirm("Confirm Changes?") == true) {
+                                window.location.href = '/deploy_config';
+                            } else {
+                                text = "You canceled!";
+                            }
+
+                            // Redirect to another page
+                        }
+
+                        document.getElementById('aclContainer').appendChild(containerDiv);
+
+                    }
+
+                </script>
+
+            </div>
+
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+</body>
+
+</html>

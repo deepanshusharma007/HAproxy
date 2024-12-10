@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap5.min.css') }}">
+    <title>HAPROXY LB</title>
+    <!-- <link rel="stylesheet" href="HA-Proxy/bootstrap/bootstrap-2.css"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='index1.css') }}">
+    <link href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' rel='stylesheet'>
+
+</head>
+
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar-->
+        <div class="border-end bg-white" id="sidebar-wrapper">
+            <div id="titlehead" class="sidebar-heading border-bottom bg-light">
+                <p class="ptag" style="font-weight: bold;align-items: center;margin-left: 15%;">Configure LB</p>
+            </div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/global">Global</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/default">Defaults</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/backend">Backend</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                    href="/frontend">Frontend</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/acl_lines">ACL</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" id="switch"
+                    href="#!">Swiching rules</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/stats">Stats</a>
+
+
+                <a class="btn btn-primary" href="/deploy_config" id="finalSubmit">Final Submit</a>
+
+            </div>
+        </div>
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <!-- <button class="navbar-toggler-icon " id="sidebarToggle"></button>
+                    <div id="panel-heading" class="Lbsetting"> HA-PROXY CONFIGURE MANAGEMENT </div> -->
+                    <div class="centered-container">
+                        <div class="NavigationToggleBar">
+                            <button class="custom-navbar-toggler" id="sidebarToggle">
+                                <img src="{{ url_for('static', filename='/chevron-left.svg') }}" id="chevronIcon">
+                            </button>
+                        </div>
+                        <div id="panel-heading" class="Lbsetting"> HA-PROXY CONFIG MANAGER </div>
+                    </div>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation"><span
+                            class="navbar-toggler-icon"></span></button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                            <li class="nav-item active"><a class="nav-link" id="titlehead" href="/">Home</a></li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false" id="titlehead">Options</a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenu">
+                                    <li>
+                                        <a class="dropdown-item" href="/global">Configure LB</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/current_haproxy">Current Config-view</a>
+
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/list_config">Deployment history</a>
+
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">HA Proxy Actions </a>
+                                        <ul class="dropdown-menu dropdown-submenu dropdown-submenu-left">
+                                            <li>
+                                                <a class="dropdown-item" id="restartButton" href="/">Restart HA
+                                                    Proxy</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" id="stopButton" href="/">Stop HA Proxy</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" id="startButton" href="/">Start HA Proxy</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/journal">HA Proxy Journal Logs</a>
+
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">Help </a>
+                                        <ul class="dropdown-menu dropdown-submenu dropdown-submenu-left">
+                                            <li>
+                                                <a class="dropdown-item" id="restartButton" href="#">About</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" id="stopButton" href="#">SOP</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" id="startButton" href="#">FAQ</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="/logout">Logout</a>
+                                </ul>
+                            </li>
+                            <li class="nav-item active"><a class="nav-link" id="titlehead" href=""> <span
+                                        class="far fa-user p-2"></span>{{ session.get('user_name') }}</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <br />
+            <h3 style="margin-left: 2%;"> Switching Rules</hh32>
+                <div class="container mt-3">
+                    <!-- <button class="faq-button" style="float: right;" id="popupBtn">?</button>
+
+                    <div id="popup" class="popup">
+                        <span class="close">&times;</span>
+                        <h4>Compression</h4>
+                        <span class="popup-content">Enables compression for responses sent to clients, reducing bandwidth
+                            usage.
+                        </span>
+                        <h4>HTTP Redirection </h4>
+                        <span class="popup-content">HTTP to HTTPS redirection
+                           </span>
+                    </div> -->
+                    <!-- {{data}} -->
+                    <form>
+                        <!-- <div>Note:In Acl Name Presently available is-blocked-ip2,is-blocked-ip3</div> -->
+                        <div id="ruleContainer"></div>
+
+                    </form>
+
+                </div>
+                <div class="d-flex justify-content-center align-items-center"
+                    style="margin-top: 1cm;padding-bottom: 1cm;">
+                    <button id="next" type="button" class="btn btn-primary">
+                        <a href="/acl_lines" style="color: white; text-decoration: none;">Previous</a>
+                    </button>
+                    <button class="btn btn-primary" type="submit" id="save">Save</button>
+                    <button id="finalSubmitnew" type="button" class="btn btn-primary">
+                        <a href="/deploy_config" style="color: white; text-decoration: none; width: 30%;">Final
+                            Submit</a>
+                    </button>
+                </div>
+        </div>
+    </div>
+    <br>
+    <!--<pre id="jsonOutput"></pre>-->
+
+    <script>
+        var path = window.location.href;
+
+        if (path.includes("switch")) {
+            const switch_id = document.getElementById("switch");
+            switch_id.style.backgroundColor = "rgb(231 231 231)";
+        }
+
+        var my_data = '{{ data }}';
+        var my_new = '{{ backend_names }}';
+
+        var newJsonData = [];
+        var backenoptions = [];
+        const finalSubmitButton = document.getElementById('finalSubmit');
+        finalSubmitButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            const userConfirmed = confirm("Are you sure you want to submit?");
+            if (userConfirmed) {
+                window.location.href = '/deploy_config';
+            }
+        });
+        function decodeEntities(encodedString) {
+            const textArea = document.createElement('textarea');
+            textArea.innerHTML = encodedString;
+            return textArea.value;
+        }
+
+        // document.getElementById("popupBtn").addEventListener("click", function () {
+        //     var popup = document.getElementById("popup");
+        //     if (popup.style.display === "block") {
+        //         popup.style.display = "none";
+        //     } else {
+        //         popup.style.display = "block";
+        //     }
+        // });
+
+        // // Close the popup when clicking outside of it
+        // window.addEventListener("click", function (event) {
+        //     var popup = document.getElementById("popup");
+        //     if (event.target !== popup && event.target !== document.getElementById("popupBtn")) {
+        //         popup.style.display = "none";
+        //     }
+        // });
+        function saveInputValues() {
+            event.preventDefault();
+            console.log("newJsonDaa", newJsonData);
+            const requestData = JSON.stringify(newJsonData);
+            // console.log("requesteddata", requestData);
+            var csrfToken = "{{ csrf_token() }}";
+            var headers = new Headers();
+            headers.append('Content-Type', 'application/json');
+            headers.append('X-CSRFToken', csrfToken); // Include the CSRF token here
+
+            fetch("/save_switching_rule", {
+                method: "POST",
+                headers: headers,
+                body: requestData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("message", data.error);
+                    if (data.error == 0) {
+                        alert('Data Saved');
+                    }
+                    else {
+                        alert(data.message)
+                    }
+                })
+
+                .catch(error => {
+                    // Handle errors
+                    alert("An error occurred while saving data");
+                    // console.error("Error:", error);
+                });
+
+        }
+        const decodedData = decodeEntities(my_data);
+        // var backend_drop_down = decodeEntities(my_new);
+
+        // backend_drop_down = backend_drop_down.substring(2, backend_drop_down.length - 2);
+
+        const decodedData1 = decodeEntities(my_new);
+
+        const jsonData = JSON.parse(decodedData);
+        const jsonData1 = JSON.parse(decodedData1);
+
+        console.log("jsondata new for switching rules is", jsonData);
+        console.log("jsondata new", jsonData1);
+
+        const saveButton = document.getElementById("save");
+        saveButton.addEventListener("click", saveInputValues);
+
+        function addSwitchingrules(ContainerDiv1, jsonIndex) {
+
+            const allbackendContainer = document.createElement("div");
+            // allbackendContainer.classList.add("acl-criterion-index-value-container");
+            // allbackendContainer.style.display = "flex";
+            // allbackendContainer.style.justifyContent = "space-between";
+
+            if (window.innerWidth > 1300) {
+                allbackendContainer.style.display = "flex";
+                allbackendContainer.style.backgroundColor = "rgb(205, 222, 228)";
+
+            } else {
+                allbackendContainer.style.display = "block";
+            }
+            // allaclContainer.style.justifyContent = "space-between";
+
+            window.addEventListener('resize', function () {
+                const innerWidth = window.innerWidth
+                console.log("innerwidth", innerWidth);
+                if (innerWidth > 1300) {
+                    allbackendContainer.style.display = "flex";
+                    allbackendContainer.style.backgroundColor = "rgb(205, 222, 228)";
+                    // allaclContainer.style.justifyContent = "space-between";
+                }
+                else {
+                    allbackendContainer.style.display = "block";
+                }
+            })
+
+            console.log("JsonData", jsonData);
+
+            newJsonData.push({ type: "new", frontend: "f_new", data: {} });
+
+            const tableRow = document.createElement("tr");
+            tableRow.style.backgroundColor = "rgb(205, 222, 228)";
+
+
+            const BackendInputCell = document.createElement("td");
+            BackendInputCell.style.marginLeft = "2%";
+            BackendInputCell.style.marginRight = "2%"
+
+            // const backendNameInput = document.createElement("input");
+            // backendNameInput.type = "text";
+            // backendNameInput.placeholder = "Enter Backend Name"
+
+            // backendNameInput.classList.add("aclnewInput")
+
+            const backendNameInput = document.createElement("select");
+            backendNameInput.name = "field";
+            // backendNameInput.classList.add("acl-input");
+            backendNameInput.classList.add("switchaclInput")
+
+            backendNameInput.innerHTML = '';
+
+            console.log("newjsondata is this --", newJsonData);
+
+            const optionB = document.createElement("option");
+            optionB.value = "Select";
+            optionB.text = "Select";
+
+            backendNameInput.appendChild(optionB);
+
+            console.log("json is this with values", backenoptions);
+            for (let optionData of jsonData1) {
+
+
+
+                const option = document.createElement("option");
+                option.value = optionData;
+                option.text = optionData;
+                // Set the text content of the option
+                backendNameInput.appendChild(option); // Append the option to the select element
+            }
+            console.log("the value is this", backendNameInput.value);
+            // BackendInputDiv.appendChild(backendNameInput);
+
+            // newJsonData[newJsonData.length - 1].data.name = backenoptions[0]?.name
+
+            backendNameInput.addEventListener('input', function () {
+                event.preventDefault();
+                jsonData[y].rule.data.name = backendNameInput.value;
+                // newJsonData[jsonIndex].rule[newJsonData[jsonIndex].rule.length - 1].data.name = backendNameInput.value;
+                newJsonData[newJsonData.length - 1].data.name = backendNameInput.value;
+
+            });
+            // backendNameInput.addEventListener('input', function () {
+            //     event.preventDefault();
+            //     jsonData[y].rule.data.name = backendNameInput.value;
+            //     newJsonData[newJsonData.length - 1].data.name = backendNameInput.value;
+            // });
+            BackendInputCell.appendChild(backendNameInput);
+            tableRow.appendChild(BackendInputCell);
+
+
+            const conditionSelectCell = document.createElement("td");
+            conditionSelectCell.style.marginLeft = "2%";
+            conditionSelectCell.style.marginRight = "2%";
+
+            const newSelect = document.createElement("Select");
+            newSelect.name = "field";
+            // newSelect.classList.add("criterion-select");
+            newSelect.classList.add("condtionInput");
+            newJsonData[newJsonData.length - 1].data.cond = "if";
+
+            const option0 = document.createElement("option");
+            option0.value = "Select";
+            option0.text = "Select";
+
+            const option1 = document.createElement("option");
+            option1.value = "if";
+            option1.text = "if";
+
+            const option2 = document.createElement("option");
+            option2.value = "unless";
+            option2.text = "unless";
+
+            newSelect.addEventListener('input', function () {
+                event.preventDefault();
+                newJsonData[newJsonData.length - 1].data.cond = newSelect.value;
+            })
+            newSelect.appendChild(option0);
+
+            newSelect.appendChild(option1);
+            newSelect.appendChild(option2);
+
+            conditionSelectCell.appendChild(newSelect);
+            tableRow.appendChild(conditionSelectCell);
+
+
+
+            const aclnameCell = document.createElement("td");
+            aclnameCell.style.marginLeft = "2%";
+            aclnameCell.style.marginRight = "2%";
+
+            const aclInput = document.createElement("select");
+            aclInput.name = "field";
+            aclInput.classList.add("switchaclInput");
+
+            const optionA = document.createElement("option");
+            optionA.value = "Select";
+            optionA.text = "Select";
+            aclInput.appendChild(optionA);
+
+            for (let optionData of jsonData[y].acl.data) {
+
+                const option = document.createElement("option");
+                option.value = optionData.acl_name;
+                option.text = optionData.acl_name;
+                // Set the text content of the option
+                aclInput.appendChild(option); // Append the option to the select element
+            }
+
+            aclInput.addEventListener('input', function () {
+                newJsonData[newJsonData.length - 1].data.cond_test = aclInput.value;
+            });
+
+            aclnameCell.appendChild(aclInput);
+            tableRow.appendChild(aclnameCell);
+
+
+            const indexinputCell = document.createElement("td");
+            indexinputCell.style.marginLeft = "2%";
+            indexinputCell.style.marginRight = "2%";
+
+            const indexInput = document.createElement("input");
+            indexInput.type = "number";
+            indexInput.classList.add("switchindexInput")
+            indexInput.setAttribute("readonly", true);
+            indexInput.disabled = true;
+
+
+            indexInput.value = newJsonData.length > 0 ? newJsonData.length - 1 : 0;
+            newJsonData[newJsonData.length - 1].data.index = newJsonData.length > 0 ? newJsonData.length - 1 : 0;
+
+            indexInput.addEventListener('input', function () {
+                newJsonData[newJsonData.length - 1].data.index = parseInt(indexInput.value);
+            });
+            indexinputCell.appendChild(indexInput);
+            tableRow.appendChild(indexinputCell);
+
+            const removeButtonCell = document.createElement("td");
+            removeButtonCell.classList.add("remove-btn");
+            removeButtonCell.style.marginTop = "2.5%";
+            removeButtonCell.style.fontSize = "medium";
+
+            const removeBindButton = document.createElement('i');
+            removeBindButton.classList.add('fas', 'fa-trash', 'fa-sm');
+            removeBindButton.classList.add('btn', 'btn-danger', 'mb-2');
+            removeBindButton.classList.add('btn', 'btn-danger', 'remove-btn');
+
+            removeBindButton.addEventListener('click', function () {
+                event.preventDefault();
+                window.location.reload(true);
+                console.log("delete is working here")
+                ContainerDiv1.removeChild(allbackendContainer);
+            });
+
+            removeButtonCell.appendChild(removeBindButton);
+            tableRow.appendChild(removeButtonCell);
+
+            const breakpoint = document.createElement("br");
+            tableRow.appendChild(allbackendContainer);
+            ContainerDiv1.appendChild(tableRow);
+            // allbackendContainer.appendChild(tableRow);
+            // ContainerDiv1.appendChild(all)
+
+        }
+        const frontend = jsonData;
+        var y = 0;
+        frontend.map((x, index) => {
+            if (x.frontend.name === "f_new") {
+                y = index;
+            }
+        })
+
+        // console.log("Jspjfndkslkvc", jsonData[y].a);
+
+
+        console.log("jsonData", jsonData);
+
+
+
+
+        for (let i = 0; i < 1; i++) {
+
+
+            const totalContainer = document.getElementById("div");
+            // totalContainer.classList.add('content-box');
+            const wholeContainer = document.createElement("div");
+            wholeContainer.classList.add('content-box');
+
+            const ruleContainerDiv = document.createElement('div');
+            // ruleContainerDiv.classList.add('total-container');
+            const acl = jsonData[i].acl;
+
+            let forfrontendindex = 0;
+
+
+            const addButtonDiv = document.createElement("div");
+            addButtonDiv.classList.add("add-btnclass");
+
+            const addBindButton = document.createElement('i');
+            addBindButton.classList.add("add-btn");
+            addBindButton.textContent = '+Add rules';
+            addBindButton.classList.add('btn', 'btn-primary', 'mb-2');
+
+            addButtonDiv.appendChild(addBindButton);
+
+            addBindButton.addEventListener('click', function () {
+                event.preventDefault();
+                window.scrollTo(0, 10000);
+                ruleContainerDiv.appendChild(switchruleTable);
+                addSwitchingrules(switchruleTable, i);
+            });
+
+            ruleContainerDiv.appendChild(addButtonDiv);
+
+            // var noteText = "Available Acl Names are <strong>" + allAclNames + "</strong>";
+
+            // var noteElement = document.createElement("h6");
+            // noteElement.innerHTML = "Note: " + noteText;
+            // ruleContainerDiv.appendChild(noteElement);
+
+            const totalFrontendContainer = document.createElement("div");
+            totalFrontendContainer.style.display = "flex";
+
+            const frontendLabelDiv = document.createElement("div");
+            frontendLabelDiv.classList.add("frontend-label");
+
+            const frontendLabel = document.createElement('label');
+            frontendLabel.textContent = "FrontEnd : ";
+            frontendLabel.classList.add("fronendLabel");
+
+            frontendLabelDiv.appendChild(frontendLabel);
+            const FrontendInputDiv = document.createElement("div");
+
+            const frontendInput = document.createElement("input");
+            frontendInput.type = "text";
+            frontendInput.classList.add("frontend-input");
+            frontendInput.style.fontSize = "medium";
+            frontendInput.disabled = true;
+            frontendInput.value = jsonData[y].frontend.name
+            FrontendInputDiv.appendChild(frontendInput);
+
+            totalFrontendContainer.appendChild(frontendLabelDiv);
+            totalFrontendContainer.appendChild(FrontendInputDiv);
+            document.getElementById('ruleContainer').appendChild(totalFrontendContainer);
+
+            const switchruleTable = document.createElement('table');
+            switchruleTable.id = 'actable';
+            switchruleTable.classList.add('table');
+
+            const thead = document.createElement('thead');
+            const headerRow1 = document.createElement('tr');
+            const headerLabels = ['Backend Name ', 'Condition', 'Acl Name', 'Index'];
+            for (const label of headerLabels) {
+                const th = document.createElement('th');
+                th.classList.add('heardersforbind');
+                th.style.marginLeft = '20px';
+                th.style.fontSize = '16px';
+                th.textContent = label + ' ';
+                headerRow1.appendChild(th);
+            }
+            thead.appendChild(headerRow1);
+            switchruleTable.appendChild(thead);
+
+            if (jsonData[y].rule.data.length == 0) {
+
+                document.getElementById('ruleContainer').appendChild(ruleContainerDiv);
+            }
+            console.log("json is thiis is ");
+            for (let optionData of jsonData[y]?.rule?.data) {
+                backenoptions.push(optionData);
+            }
+            console.log("the option of name is", jsonData[y].rule.data);
+
+            for (let j = 0; j < jsonData[y].rule.data.length; j++) {
+
+                const totalFrontendContainer = document.createElement("div");
+                totalFrontendContainer.style.display = "flex";
+                newJsonData.push({ type: "old", data: {} });
+
+                const frontendLabelDiv = document.createElement("div");
+
+                const frontendLabel = document.createElement('label');
+                frontendLabel.textContent = "FrontEnd : ";
+
+                frontendLabelDiv.appendChild(frontendLabel);
+                const FrontendInputDiv = document.createElement("div");
+
+                const frontendInput = document.createElement("input");
+                frontendInput.type = "text";
+                // frontendInput.classList.add("form-control1")
+                frontendInput.disabled = true;
+                FrontendInputDiv.appendChild(frontendInput);
+
+                totalFrontendContainer.appendChild(frontendLabelDiv);
+                totalFrontendContainer.appendChild(FrontendInputDiv);
+
+                frontendInput.value = jsonData[y].frontend.name
+                // newJsonData[i].frontend = {};
+                newJsonData[j].frontend = jsonData[y].frontend.name;
+
+                frontendInput.addEventListener('input', function () {
+                    event.preventDefault();
+                    // newJsonData[i].frontend.name = frontendInput.value
+                    newJsonData[j].frontend = frontendInput.value;
+
+                })
+
+                const allbackendContainer = document.createElement("div");
+                if (window.innerWidth > 1300) {
+                    allbackendContainer.style.display = "flex";
+                    allbackendContainer.style.backgroundColor = "rgb(205, 222, 228)";
+                } else {
+                    allbackendContainer.style.display = "block";
+                }
+
+                window.addEventListener('resize', function () {
+                    const innerWidth = window.innerWidth
+                    console.log("innerwidth", innerWidth);
+                    if (innerWidth > 1300) {
+                        allbackendContainer.style.display = "flex";
+                        allbackendContainer.style.backgroundColor = "rgb(205, 222, 228)";
+
+                        // allaclContainer.style.justifyContent = "space-between";
+                    }
+                    else {
+                        allbackendContainer.style.display = "block";
+                    }
+                })
+                console.log("json is thiis   2")
+                const tableRow = document.createElement('tr');
+                tableRow.style.backgroundColor = "rgb(205, 222, 228)";
+                tableRow.style.borderRadius = "8px";
+
+                const BackendInputCell = document.createElement("td");
+                BackendInputCell.style.marginLeft = "2%";
+                BackendInputCell.style.marginRight = "2%";
+
+                const backendNameInput = document.createElement("select");
+                backendNameInput.name = "field";
+                backendNameInput.classList.add("rulesnewInputSelect");
+                console.log("json is thiis is for j", newJsonData)
+
+                console.log("json is thiis", jsonData[y].rule.data);
+                for (let optionData of jsonData[y]?.rule?.data) {
+                    console.log("the option of name is", jsonData[y].rule.data.name);
+                    // backenoptions.push(optionData);
+
+                    const option = document.createElement("option");
+
+                    option.value = optionData.name;
+                    option.text = optionData.name;
+                    // Set the text content of the option
+                    backendNameInput.appendChild(option); // Append the option to the select element
+                }
+
+                console.log("backend input value is this--", backendNameInput.value);
+
+                backendNameInput.value = jsonData[y].rule.data[j].name;
+
+                newJsonData[j].data.name = jsonData[y].rule.data[j].name;
+                backendNameInput.addEventListener('input', function () {
+                    jsonData[y].rule.data[j].name = backendNameInput.value;
+                    newJsonData[j].data.name = backendNameInput.value;
+                });
+                BackendInputCell.appendChild(backendNameInput);
+                tableRow.appendChild(BackendInputCell);
+
+
+                const conditionSelectCell = document.createElement("td");
+                conditionSelectCell.style.marginLeft = "2%";
+                conditionSelectCell.style.marginRight = "2%";
+                // conditionSelectDiv.classList.add("custom-condition-input", "form-control3");
+
+                const newSelect = document.createElement("Select");
+                newSelect.name = "field";
+                newSelect.classList.add("condtionInput");
+
+                const apiValue = jsonData[y].rule.data[j].cond;
+                newSelect.value = apiValue;
+
+
+                const option1 = document.createElement("option");
+                option1.value = "if";
+                option1.text = "if";
+
+                const option2 = document.createElement("option");
+                option2.value = "unless";
+                option2.text = "unless";
+
+                newJsonData[j].data.cond = "if";
+
+                newJsonData[j].data.cond = jsonData[y].rule.data[j].cond;
+                newSelect.value = jsonData[y].rule.data[j].cond;
+
+                console.log("Value from jsonData", jsonData[y].rule.data[j].cond);
+                newSelect.addEventListener('input', function () {
+                    event.preventDefault();
+                    newJsonData[j].data.cond = newSelect.value;
+                })
+                newSelect.appendChild(option1);
+                newSelect.appendChild(option2);
+                for (let option of newSelect.options) {
+                    if (option.value === apiValue) {
+                        option.selected = true;
+                    }
+                }
+                conditionSelectCell.appendChild(newSelect);
+                tableRow.appendChild(conditionSelectCell);
+
+
+                const aclnameCell = document.createElement("td");
+                aclnameCell.style.marginLeft = "2%";
+                aclnameCell.style.marginRight = "2%";
+
+                const aclNameInput = document.createElement("select");
+                aclNameInput.name = "field";
+                aclNameInput.classList.add("rulesnewInputSelect");
+
+                if (jsonData[y].rule.data[j] && (typeof jsonData[y].rule.data[j] === 'object' || Array.isArray(jsonData[y].rule.data[j]))) {
+
+                    // if (Array.isArray(jsonData[y].rule.data[j])) {
+                    // Iterate through the data and create options
+                    console.log("json is for acl thiis", jsonData[y].acl.data);
+                    console.log("json is for rule", jsonData[y].rule.data);
+
+                    var rulesArray = [];
+                    jsonData[y].rule.data && jsonData[y].rule.data.map(x => {
+                        if (x?.cond_test && x.cond_test !== null && x.cond_test !== undefined) {
+                            rulesArray.push(x.cond_test)
+                        }
+                    })
+
+                    jsonData[y]?.acl?.data && jsonData[y].acl.data.map(x => {
+                        if (x?.acl_name && x.acl_name !== null && x.acl_name !== undefined) {
+                            rulesArray.push(x.acl_name);
+                        }
+                    })
+
+
+
+                    var optionSet = new Set(rulesArray);
+
+                    console.log("rulesArray", rulesArray);
+                    for (let optionData of optionSet) {
+                        const option = document.createElement("option");
+                        option.value = optionData;
+                        option.text = optionData;
+                        aclNameInput.appendChild(option); // Append the option to the select element
+                    }
+
+
+                    //     console.log("jsonDataofApi", jsonData)
+                    //     console.log(" jsonData[y].acl.data", jsonData[y].acl.data, jsonData[y].rule.data);
+
+                    //     var optionvalues = []
+
+                    //     jsonData[y].rule.data.map(z => {
+                    //         var nameofAcl=null;
+                    //         var flag = 0;
+                    //         jsonData[y]?.acl && jsonData[y].acl.data.map(x => { 
+                    //             nameofAcl=x.acl_name
+                    //             if (x.acl_name.trim().toLocaleLowerCase() === z.cond_test.trim().toLocaleLowerCase()) {
+                    //                 flag = 1;
+                    //             }
+                    //         })
+                    //         if (flag === 0 && nameofAcl!==null) {
+                    //             optionvalues.push(nameofAcl);
+                    //         }
+                    //     })
+
+                    // console.log("optionvalues", optionvalues)
+
+                    // for (let i = 0; i < optionvalues.length; i++) {
+                    //     const optiona = document.createElement("option");
+                    //     optiona.value = optionvalues[i];
+                    //     optiona.text = optionvalues[i];
+                    //     aclNameInput.appendChild(optiona)
+                    // }
+
+                } else {
+                    console.error("No data exist");
+                }
+
+                aclNameInput.value = jsonData[y].rule.data[j].cond_test ? jsonData[y].rule.data[j].cond_test : "";
+
+
+                newJsonData[j].data.cond_test = jsonData[y].rule.data[j] ? jsonData[y].rule.data[j].cond_test : "NUll";
+
+
+                aclNameInput.addEventListener('input', function () {
+                    newJsonData[j].data.cond_test = aclNameInput.value;
+                });
+
+                aclnameCell.appendChild(aclNameInput);
+                tableRow.appendChild(aclnameCell);
+
+                const indexinputCell = document.createElement("td");
+                indexinputCell.style.marginLeft = "2%";
+                indexinputCell.style.marginRight = "2%";
+                // indexinputDiv.classList.add("col-md-6", "mb-3", "form-group");
+
+                const indexInput = document.createElement("input");
+                indexInput.type = "number";
+                indexInput.classList.add("switchindexInput");
+
+                // indexInput.classList.add("custom-index-input", "form-control4");
+                indexInput.disabled = true;
+                indexInput.setAttribute("readonly", true);
+
+
+
+                indexInput.value = jsonData[y].rule.data[j].index;
+                newJsonData[j].data.index = parseInt(jsonData[y].rule.data[j].index);
+                indexInput.addEventListener('input', function () {
+                    jsonData[y].rule.data[j].index = indexInput.value;
+                    // newJsonData[i].rule[j].data.index = indexInput.value;
+                    newJsonData[j].data.index = indexInput.value;
+                });
+                indexinputCell.appendChild(indexInput);
+                tableRow.appendChild(indexinputCell);
+
+                const addButtonDiv = document.createElement("div");
+                addButtonDiv.classList.add("add-btnclass");
+
+                const addBindButton = document.createElement('i');
+                addBindButton.classList.add("add-btn");
+                addBindButton.textContent = '+Add rules';
+                addBindButton.classList.add('btn', 'btn-primary', 'mb-2');
+
+                addButtonDiv.appendChild(addBindButton);
+                addBindButton.addEventListener('click', function () {
+                window.scrollTo(0, 10000);
+                event.preventDefault();
+                addSwitchingrules(ruleContainerDiv, i);
+                });
+                // ruleContainerDiv.appendChild(addButtonDiv);
+
+                const removeButtonDiv = document.createElement("td");
+                removeButtonDiv.classList.add("remove-btn");
+                removeButtonDiv.style.marginLeft = "1.2%";
+                // removeButtonDiv.style.marginLeft = "4%";
+                removeButtonDiv.style.marginTop = "2.5%";
+                removeButtonDiv.style.fontSize = "medium";
+
+                const removeBindButton = document.createElement('button');
+                removeBindButton.classList.add('fas', 'fa-trash', 'fa-sm');
+                removeBindButton.classList.add('btn', 'btn-danger', 'mb-2');
+                removeBindButton.classList.add('btn', 'btn-danger', 'remove-btn');
+
+                removeButtonDiv.appendChild(removeBindButton);
+
+                removeBindButton.addEventListener('click', function () {
+                    event.preventDefault();
+                    var csrfToken = "{{ csrf_token() }}";
+                    var headers = new Headers();
+                    headers.append('Content-Type', 'application/json');
+                    headers.append('X-CSRFToken', csrfToken); // Include the CSRF token here
+
+                    if (window.confirm("Are you want to delete")) {
+                        fetch('/delete_switching_rule', {
+                            method: 'POST',
+                            headers: headers,
+                            body: JSON.stringify({ frontend: "f_new", index: indexInput.value }), // Send the backend name to delete
+                        })
+                            .then(response => {
+                                if (response.status === 200) {
+                                    return response.json();
+                                } else if (response.status === 404) {
+                                    console.error('index not found');
+                                }
+                            })
+                            .then(jsonData => {
+                                if (jsonData && jsonData.error !== undefined) {
+                                    if (jsonData.error === 1) {
+                                        // Handle error with value 1
+                                        alert("You are not sudo user!");
+                                    } else if (jsonData.error === 0) {
+                                        alert("Switching rule deleted successfully");
+                                        window.location.reload(true);
+                                        // Handle any UI updates as needed
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                // Handle other errors
+                            });
+                        ruleContainerDiv.appendChild(allbackendContainer);
+                        // document.getElementById('ruleContainer').removeChild(ruleContainerDiv);
+                    }
+                });
+
+                const breakpoint = document.createElement("br");
+
+                if (forfrontendindex == 0) {
+                    forfrontendindex++;
+                }
+                switchruleTable.appendChild(tableRow);
+
+                allbackendContainer.appendChild(removeButtonDiv);
+                tableRow.appendChild(removeButtonDiv);
+
+                ruleContainerDiv.appendChild(switchruleTable);
+
+
+                document.getElementById('ruleContainer').appendChild(ruleContainerDiv);
+            }
+        }
+
+        data = [
+            {
+                "type": "old",
+                "frontend": "f_new",
+                "data": { "cond": "if", "cond_test": " ! is-blocked-ip", "name": "httpback", "index": 0 }
+            }
+        ];
+        data = { "frontend": "f_new", "index": 0 };
+
+        //data = {"server": "server_new1", "backend": "new_backend_from_python2"};
+
+        function showAlertAndRedirect() {
+            // Show an alert
+            //alert('Do you want to Deploy config?');
+            if (confirm("Confirm Changes?") == true) {
+                window.location.href = '/deploy_config';
+            } else {
+                text = "You canceled!";
+            }
+
+            // Redirect to another page
+        }
+    </script>
+    <script src="../static/scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+
+</body>
+
+</html>

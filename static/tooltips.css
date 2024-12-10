@@ -1,0 +1,44 @@
+.tooltip {
+    position: relative;
+    }
+  .showInfo::before {
+    content: attr(data-tooltip); /* Get tooltip text from data-tooltip attribute */
+    position:  absolute;
+    margin-top:2%;
+    background-color: #fff; /* Background color of the tooltip */
+    border: 1px solid #ccc; /* Border color */
+    padding: 5px; /* Padding */
+    display: none; /* Initially hidden */
+    z-index: 1; /* Ensure the tooltip appears above other elements */
+  }
+  
+  .showInfo:hover::before {
+    display: block; /* Show on hover */
+  }
+  
+  /* You can customize the tooltip text and styles below */
+  .showInfo::before {
+    color: #333; /* Text color */
+    font-size: 12px; /* Font size */
+    width: auto; /* Width of the tooltip (auto to fit content) */
+    text-align: left; /* Text alignment */
+  }
+  
+
+  /* CSS for Tooltip */
+/* [data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:hover:after {
+    content: attr(data-tooltip);
+    position: absolute;
+    font-size: small;
+   
+    background-color: #fff; 
+    border: 1px solid #ccc;
+ 
+    padding: 5px;
+  
+    z-index: 1;
+} */

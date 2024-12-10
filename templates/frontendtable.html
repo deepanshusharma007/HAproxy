@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bind Configuration</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: 20px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+
+    <table>
+        <tr>
+            <th>Label</th>
+            <th>Input Field</th>
+        </tr>
+        <tr>
+            <td>Bind Address</td>
+            <td><input type="text" id="bindAddress"></td>
+        </tr>
+        <tr>
+            <td>Bind Name</td>
+            <td><input type="text" id="bindName"></td>
+        </tr>
+        <tr>
+            <td>Bind Port</td>
+            <td><input type="text" id="bindPort"></td>
+        </tr>
+    </table>
+
+    <script>
+        // You can use JavaScript to interact with these input fields
+        // For example, accessing the values entered by the user:
+
+        // Creating the table element
+        const table = document.createElement("table");
+        table.style.borderCollapse = "collapse"; // Optional: Styling for table borders
+
+        // Function to create table row
+        function createTableRow() {
+            return document.createElement("tr");
+        }
+
+        // Function to create table header (th) element
+        function createTableHeader(textContent) {
+            const th = document.createElement("th");
+            th.textContent = textContent;
+            th.classList.add("fronendLabel"); // You can add additional classes or styles here
+            return th;
+        }
+
+        // Function to create table data (td) element with input field
+        function createTableDataInput(type, value) {
+            const td = document.createElement("td");
+            const inputField = document.createElement('input');
+            inputField.type = type;
+            inputField.value = value;
+            inputField.classList.add("bindaddressInput"); // You can add additional classes or styles here
+            td.appendChild(inputField);
+            return td;
+        }
+
+        // Creating the table structure for Bind Address
+        const bindAddressRow = createTableRow();
+        bindAddressRow.appendChild(createTableHeader("Bind Address:"));
+        bindAddressRow.appendChild(createTableDataInput("text", jsonData[y].bind.data[j].address));
+
+        // Adding input event listener to the input field
+        const bindAddressInput = bindAddressRow.querySelector('input');
+        bindAddressInput.addEventListener('input', function () {
+            event.preventDefault();
+            secondnewJsonData[i].bind[j].data.address = bindAddressInput.value.trim();
+        });
+
+        // Creating the table structure for Bind Name
+        const bindNameRow = createTableRow();
+        bindNameRow.appendChild(createTableHeader("Bind Name:"));
+        bindNameRow.appendChild(createTableDataInput("text", jsonData[y].bind.data[j].name));
+
+        // Adding input event listener to the input field
+        const bindNameInput = bindNameRow.querySelector('input');
+        bindNameInput.addEventListener('input', function () {
+            event.preventDefault();
+            secondnewJsonData[i].bind[j].data.name = bindNameInput.value.trim();
+        });
+
+        // Creating the table structure for Bind Port number
+        const bindPortRow = createTableRow();
+        bindPortRow.appendChild(createTableHeader("Bind Port number:"));
+        bindPortRow.appendChild(createTableDataInput("number", jsonData[y].bind.data[j].port.toString()));
+
+        // Adding input event listener to the input field
+        const bindPortInput = bindPortRow.querySelector('input');
+        bindPortInput.addEventListener('input', function () {
+            event.preventDefault();
+            secondnewJsonData[i].bind[j].data.port = parseInt(bindPortInput.value.trim());
+        });
+
+        // Appending table rows to the table
+        table.appendChild(bindAddressRow);
+        table.appendChild(bindNameRow);
+        table.appendChild(bindPortRow);
+
+        // Appending the table to a container element (assuming you have a container div with id "tableContainer")
+        const tableContainer = document.getElementById("tableContainer");
+        tableContainer.appendChild(table);
+
+    </script>
+
+</body>
+
+</html>

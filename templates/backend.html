@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap5.min.css') }}">
+    <title>HAPROXY LB</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index1.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tooltips.css') }}">
+    <link href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' rel='stylesheet'>
+
+    <!-- <style>
+        body {
+            width: 90%;
+
+        }
+    </style> -->
+</head>
+
+<body>
+
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar-->
+        <div class="border-end bg-white" id="sidebar-wrapper">
+            <div id="titlehead" class="sidebar-heading border-bottom bg-light">
+                <p class="ptag" style="font-weight: bold;align-items: center;margin-left: 15%;">Configure LB</p>
+            </div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/global">Global</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/default">Defaults</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" id="backend"
+                    href="#">Backend</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                    href="/frontend">Frontend</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/acl_lines">ACL</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                    href="/backend_switching_rule">Swiching rules</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/stats">Stats</a>
+                <br />
+                <a class="btn btn-primary" href="/deploy_config" id="finalSubmit">Final Submit</a>
+
+            </div>
+        </div>
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <!-- <button class="navbar-toggler-icon " id="sidebarToggle"></button>
+                    <div id="panel-heading" class="Lbsetting"> HA-PROXY CONFIGURE MANAGEMENT </div> -->
+                    <div class="centered-container">
+                        <div class="NavigationToggleBar">
+                            <!-- <div> -->
+                            <button class="custom-navbar-toggler" id="sidebarToggle">
+                                <img src="{{ url_for('static', filename='/chevron-left.svg') }}" id="chevronIcon">
+                            </button>
+                        </div>
+                        <div id="panel-heading" class="Lbsetting">HA-PROXY CONFIG MANAGER </div>
+                    </div>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation"><span
+                            class="navbar-toggler-icon"></span></button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                            <li class="nav-item active"><a class="nav-link" id="titlehead" href="/">Home</a></li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false" id="titlehead">Options</a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenu">
+                                    <li>
+                                        <a class="dropdown-item" href="/global">Configure LB</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/current_haproxy">Current Config-view</a>
+
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/list_config">Deployment history</a>
+
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">HA Proxy Actions </a>
+                                        <ul class="dropdown-menu dropdown-submenu dropdown-submenu-left">
+                                            <li>
+                                                <a class="dropdown-item" id="restartButton" href="/">Restart HA
+                                                    Proxy</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" id="stopButton" href="/">Stop HA Proxy</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" id="startButton" href="/">Start HA Proxy</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/journal">HA Proxy Journal Logs</a>
+
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">Help </a>
+                                        <ul class="dropdown-menu dropdown-submenu dropdown-submenu-left">
+                                            <li>
+                                                <a class="dropdown-item" id="restartButton" href="#">About</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" id="stopButton" href="#">SOP</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" id="startButton" href="#">FAQ</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="/logout">Logout</a>
+                                </ul>
+                            </li>
+                            <li class="nav-item active"><a class="nav-link" id="titlehead" href=""> <span
+                                        class="far fa-user p-2"></span>{{ session.get('user_name') }}</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <br>
+            <h3 style="margin-left: 1%;">Backend Section</h3>
+            <div class="container mt-1">
+                <div id="backendContainer">
+                    <!-- <button class="faq-button" style="float: right;" id="popupBtn">?</button> -->
+
+                    <!-- <div id="popup" class="popup">
+                        <span class="close">&times;</span>
+                        <h4>Balance</h4>
+                        <span class="popup-content">Specify the load-balancing algorithm for distributing traffic among
+                            backend servers.</span>
+                        <h4>Mode</h4>
+                        <span class="popup-content">Define the mode of operation for the backend servers. Options
+                            include 'TCP' for raw TCP communication, 'http' for HTTP traffic processing.</span>
+                    </div> -->
+
+
+                    <!-- <button style="float: right;" id="question-mark-btn">&#63;</button>
+
+                    <div id="question-modal" class="modal">
+                        <div class="modal-content">
+                            <span class="close">&times;</span>
+                            <h2>Balance: </h2>
+                            <p>Specify the load-balancing algorithm for distributing traffic among backend servers.</p>
+                            <br/>
+                            <h4>Mode:</h4>
+                            <p>Define the mode of operation for the backend servers. Options include 'TCP' for raw TCP
+                                communication, 'http' for HTTP traffic processing </p>
+                        </div> -->
+                </div>
+                <form id="backendForm"> </form>
+            </div>
+            <div class="d-flex justify-content-center align-items-center" style="margin-top: 3cm;padding-bottom: 1cm;">
+                <button id="next" type="button" class="btn btn-primary">
+                    <a href="/default" style="color: white; text-decoration: none;">Previous</a>
+                </button>
+                <button type="submit" id='save' class="btn btn-primary">Save</button>
+                <button id="next" type="button" class="btn btn-primary">
+                    <a href="/frontend" style="color: white; text-decoration: none;">Next</a>
+                </button>
+            </div>
+        </div>
+        <!-- <a href="#" onclick="showAlertAndRedirect();" class="btn btn-primary">Final Submit</a> -->
+    </div>
+    </div>
+    <!--<pre id="jsonOutput"></pre>-->
+    <script>
+        var json = '{{ data }}';
+
+        var path = window.location.href;
+
+        if (path.includes("backend")) {
+            const backend_id = document.getElementById("backend");
+            backend_id.style.backgroundColor = "rgb(231 231 231)";
+        }
+
+        const finalSubmitButton = document.getElementById('finalSubmit');
+        finalSubmitButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            const userConfirmed = confirm("Are you sure you want to submit?");
+            if (userConfirmed) {
+                window.location.href = '/deploy_config';
+            }
+        });
+        // document.addEventListener('DOMContentLoaded', function () {
+        //     var modal = document.getElementById("question-modal");
+        //     var btn = document.getElementById("question-mark-btn");
+        //     var span = document.getElementsByClassName("close")[0];
+
+        //     btn.onclick = function () {
+        //         modal.style.display = "block";
+        //     }
+
+        //     span.onclick = function () {
+        //         modal.style.display = "none";
+        //     }
+
+        //     window.onclick = function (event) {
+        //         if (event.target == modal) {
+        //             modal.style.display = "none";
+        //         }
+        //     }
+        // });
+
+        // document.getElementById("popupBtn").addEventListener("click", function () {
+        //     var popup = document.getElementById("popup");
+        //     if (popup.style.display === "block") {
+        //         popup.style.display = "none";
+        //     } else {
+        //         popup.style.display = "block";
+        //     }
+        // });
+
+        // // Close the popup when clicking outside of it
+        // window.addEventListener("click", function (event) {
+        //     var popup = document.getElementById("popup");
+        //     if (event.target !== popup && event.target !== document.getElementById("popupBtn")) {
+        //         popup.style.display = "none";
+        //     }
+        // });
+
+        function decodeEntities(encodedString) {
+            const textArea = document.createElement('textarea');
+            textArea.innerHTML = encodedString;
+            return textArea.value;
+        }
+        const decodedData = decodeEntities(json);
+        const jsonData = JSON.parse(decodedData);
+        console.log("the jsonfor backend is this", jsonData);
+        //New Json Data
+        const newJsonData = [];
+        var newjson_index_servers = 0;
+        var newjson_index_backend = 0;
+        var serverIndex = 0;
+        var backendIndexTOremove, serverIndexToRemove;
+
+        // if (!newJsonData[newjson_index_backend].type) {
+        //     newJsonData[newjson_index_backend].type = ""; // Create the backend object if it doesn't exist
+        //     newJsonData[newjson_index_backend].data = {
+        //         name: "",
+        //         balance: { algorithm: {} }
+        //     }
+        // }
+        // if (!newJsonData[newjson_index_backend].server) {
+        //     newJsonData[newjson_index_backend].server = []; // Create the server object if it doesn't exist
+
+        //     newJsonData[newjson_index_backend].server[serverIndex] = {
+        //         type: "",
+        //         data: ""
+        //     };
+        //     newJsonData[newjson_index_backend].server[serverIndex].data = {
+        //         name: "",
+        //         address: "",
+        //         port: "",
+        //         check: "",
+        //     }
+        // }
+
+        const fieldMappings = [
+            { backend: 'backendname', server: 'servername', port: 'port', address: 'ip' },
+            // Add more mappings for indexes 1 to 6 if needed
+        ];
+
+        const z = 0;
+        function saveInputValues() {
+            event.preventDefault();
+            console.log("New Json Data is this", newJsonData);
+            let SubmitFlag = 0;
+            newJsonData && newJsonData.map(x => {
+                if (x && x.data && (x.data.name === "")) {
+                    SubmitFlag = 1;
+                    console.log("working");
+                }
+                else if (x.data.backend?.balance?.algorithm === "" || x.data?.mode === "") {
+                    SubmitFlag = 1;
+                    console.log("working2");
+
+                }
+                x && x.server.map(y => {
+                    if (y && y.data && (y.data.name === "" || y.data.address === "" || y.data.port === "" || y.data.check === "")) {
+                        SubmitFlag = 1;
+                        console.log("working3");
+
+                    }
+                })
+            })
+            console.log("SubitFlag", SubmitFlag);
+            if (SubmitFlag == 0) {
+
+                newJsonData && newJsonData.map((x, index) => {
+
+                    x && x.server.map((y, index1) => {
+                        if (y.data.name === undefined || y.data.name === 'undefined') {
+                            // if (x.server?.length === 1) {
+                            //     delete newJsonData[index].server;
+                            // }
+                            // else {
+                            newJsonData[index].server.splice(index1, 1);
+                            // }
+                        }
+                    })
+
+                })
+
+                console.log("newJsonData,newJsonData,newJsonData", newJsonData)
+
+
+                const requestData = JSON.stringify(newJsonData);
+                // console.log("Jsodc", requestData);
+                var csrfToken = "{{ csrf_token() }}";
+                var headers = new Headers();
+                headers.append('Content-Type', 'application/json');
+                headers.append('X-CSRFToken', csrfToken); // Include the CSRF token here
+
+
+                fetch("/save_backend", {
+                    method: "POST",
+                    headers: headers,
+                    body: requestData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Server response:", data);
+
+                        // Handle the response
+                        if (data.error === 0) {
+                            // Data saved successfully
+                            alert("Data Saved");
+                            window.location.reload(true);
+                        } else {
+                            alert("Data Save Failed");
+                            console.log(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        // Handle errors
+                        alert("An error occurred while saving data");
+                        console.error("Error:", error);
+                    });
+            } else {
+                alert("Please Fill the form correctly and then submit")
+            }
+        }
+        // Attach a click event listener to the save button
+
+        const form = document.getElementById("backendForm");
+        // form.id = "backendForm";
+
+        form.addEventListener("submit", function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                alert("Please fill in the required field.");
+            }
+        });
+
+        const saveButton = document.getElementById('save');
+        saveButton.addEventListener('click', function () {
+            if (form.reportValidity()) {
+                event.preventDefault();
+                saveInputValues();
+            }
+        });
+        let flag = 0;
+        let backendDeleteIndex = 0;
+        var deletebackend = "";
+        var deletebackendfirst = "";
+        var deleteserver = "";
+
+        var colors = ["rgb(205, 222, 228)", "rgb(240 199 231 / 52%)"];
+        // var colors = ["rgb(43 118 217 / 64%)", "rgb(150 239 195/66%)"];
+
+        var serverheaderflag = 0;
+
+
+        function addBackendFields(containerDiv, deleteIndex) {
+
+            serverheaderflag = 1;
+
+            var hrElement = document.createElement("hr");
+            containerDiv.appendChild(hrElement);
+            // containerDiv.style.backgroundColor = colors[jsonData.length/2];
+
+            const allbackendaddContainer = document.createElement("div");
+            // allbackendaddContainer.style.backgroundColor = "rgb(205, 222, 228)";
+            // allbackendaddContainer.style.backgroundColor = colors[jsonData.length/2];
+
+            const totalbackendContainer = document.createElement("div");
+            totalbackendContainer.classList.add("backend-container", 'added-container');
+
+            const backendSection = document.createElement("div");
+            backendSection.style.display = "flex";
+            backendSection.style.marginTop = "0.5cm";
+
+            const backendlableDiv = document.createElement("div");
+
+            const backendlabel = document.createElement('label');
+            backendlabel.textContent = 'Backend:';
+            backendlabel.classList.add("addservernewLabel");
+
+            backendlableDiv.appendChild(backendlabel);
+
+            const backendinputDiv = document.createElement("div");
+            backendinputDiv.style.marginLeft = "2%";
+            backendinputDiv.style.marginRight = "2%";
+            backendinputDiv.style.marginTop = "-2%";
+
+            // backendinputDiv.classList.add("backend-cnt");
+
+            const backendInputField = document.createElement('input');
+            backendInputField.type = "text";
+            backendInputField.placeholder = 'Enter the backend value';
+            backendInputField.classList.add("aclnewInput")
+            backendInputField.required = true;
+
+            backendinputDiv.appendChild(backendInputField);
+
+            newJsonData.push({ type: "new", server: [], data: { name: '', mode: '', balance: { algorithm: "" } } });
+            // console.log("newJsonDatalength", newJsonData.length)
+            // newJsonData[newJsonData.length - 1].data.name = backendInputField.value;
+            flag = 1;
+
+            backendInputField.addEventListener('input', () => {
+                event.preventDefault();
+                if (backendInputField.value == null) {
+                    alert("please fill the field")
+                }
+                newJsonData[newJsonData.length - 1].data.name = backendInputField.value; // Update the array with the new value
+                // newjson_index_backend++;
+            })
+
+
+            const totalbalanceContainer = document.createElement('div');
+
+            if (window.innerWidth > 1300) {
+                totalbalanceContainer.style.display = "flex";
+                // totalbalanceContainer.style.backgroundColor = colors[jsonData.length / 2];
+
+            } else {
+                totalbalanceContainer.style.display = "flex";
+            }
+
+            window.addEventListener('resize', function () {
+                const innerWidth = window.innerWidth
+                // console.log("innerwidth", innerWidth);
+                if (innerWidth > 1300) {
+                    totalbalanceContainer.style.display = "flex";
+                    // totalbalanceContainer.style.backgroundColor = colors[jsonData.length / 2];
+
+                    // totalbalanceContainer.style.justifyContent = "space-between";
+                }
+                else {
+                    totalbalanceContainer.style.display = "flex";
+                }
+            })
+
+            const balanceSection = document.createElement("div");
+            balanceSection.style.display = "flex";
+            balanceSection.style.marginLeft = "4%";
+            balanceSection.style.marginTop = "0.5cm";
+
+            const balancelableDiv = document.createElement('div');
+            balancelableDiv.classList.add("balance-lable-cnt");
+            balancelableDiv.style.marginLeft = "2%";
+
+            const balancelabel = document.createElement('label');
+            balancelabel.textContent = "Balance : ";
+            balancelabel.classList.add("addservernewLabel", "showInfo");
+            balancelabel.setAttribute("data-tooltip", "Specify the load-balancing algorithm for distributing traffic among backend servers");
+
+            balancelableDiv.appendChild(balancelabel);
+
+            const balanceSelectDiv = document.createElement("div");
+            balanceSelectDiv.style.marginLeft = "2%";
+            balanceSelectDiv.style.marginRight = "2%";
+            balanceSelectDiv.style.marginTop = "-2%";
+
+            // balanceSelectDiv.classList.add("balance-select");
+
+            const balanceSelect = document.createElement('Select');
+            balanceSelect.name = "field";
+            balanceSelect.classList.add("aclnewInput")
+            balanceSelect.required = true;
+            // balanceSelect.classList.add("balance-select");
+
+            const option0 = document.createElement("option");
+            option0.value = "Select";
+            option0.text = "Select";
+            const option1 = document.createElement("option");
+            option1.value = "roundrobin";
+            option1.text = "roundrobin";
+            const option2 = document.createElement("option");
+            option2.value = "static-rr";
+            option2.text = "static-rr";
+            const option3 = document.createElement("option");
+            option3.value = "leastconn";
+            option3.text = "leastconn";
+            const option4 = document.createElement("option");
+            option4.value = "first";
+            option4.text = "first";
+            const option5 = document.createElement("option");
+            option5.value = "source";
+            option5.text = "source";
+            const option6 = document.createElement("option");
+            option6.value = "uri";
+            option6.text = "uri";
+            const option7 = document.createElement("option");
+            option7.value = "url_param";
+            option7.text = "url_param";
+            const option8 = document.createElement("option");
+            option8.value = "hdr";
+            option8.text = "hdr";
+            const option9 = document.createElement("option");
+            option9.value = "random";
+            option9.text = "random";
+            const option10 = document.createElement("option");
+            option10.value = "rdp-cookie";
+            option10.text = "rdp-cookie";
+            const option11 = document.createElement("option");
+            option11.value = "hash";
+            option11.text = "hash";
+
+            balanceSelect.addEventListener('input', function () {
+                event.preventDefault();
+                newJsonData[newJsonData.length - 1].data.balance.algorithm = balanceSelect.value;
+            });
+
+            balanceSelect.appendChild(option0);
+            balanceSelect.appendChild(option1);
+            balanceSelect.appendChild(option2);
+            balanceSelect.appendChild(option3);
+            balanceSelect.appendChild(option4);
+            balanceSelect.appendChild(option5);
+            balanceSelect.appendChild(option6);
+            balanceSelect.appendChild(option7);
+            balanceSelect.appendChild(option8);
+            balanceSelect.appendChild(option9);
+            balanceSelect.appendChild(option10);
+            balanceSelect.appendChild(option11);
+            balanceSelectDiv.appendChild(balanceSelect);
+
+            const ModeSection = document.createElement("div");
+            ModeSection.style.display = "flex";
+            ModeSection.style.marginLeft = "4%";
+            ModeSection.style.marginTop = "0.5cm";
+
+            const ModeLabelDiv = document.createElement("div");
+            ModeLabelDiv.classList.add("mode-lable-cnt");
+            ModeLabelDiv.style.marginLeft = "2%";
+
+            const Modelabel = document.createElement("label");
+            Modelabel.textContent = "Mode:";
+            Modelabel.classList.add("addservernewLabel");
+
+
+            ModeLabelDiv.appendChild(Modelabel);
+
+            const ModeSelectDiv = document.createElement("div");
+            ModeSelectDiv.style.marginLeft = "2%";
+            ModeSelectDiv.style.marginRight = "2%";
+            ModeSelectDiv.style.marginTop = "-2%";
+
+            const newSelect = document.createElement("Select");
+            newSelect.name = "field";
+            newSelect.classList.add("aclnewInput")
+            newSelect.required = true;
+            // newSelect.classList.add("mode-select");
+            // newSelect.text = jsonData[j].data.balance.mode;
+            // newSelect.value = jsonData[j].data.balance.mode;
+
+            const optionA = document.createElement("option");
+
+            optionA.value = "Select";
+            optionA.text = "Select";
+            const optiona = document.createElement("option");
+            // optiona.value = jsonData[jsonData.length - 1]?.backend?.balance?.mode == "TCP" ? "TCP" : "HTTP";
+            // optiona.text = jsonData[jsonData.length - 1]?.backend?.balance?.mode == "TCP" ? "TCP" : "HTTP";
+
+            optiona.value = newJsonData[newJsonData.length - 1]?.data?.mode == "TCP" ? "TCP" : "HTTP";
+            optiona.text = newJsonData[newJsonData.length - 1]?.data?.mode == "TCP" ? "TCP" : "HTTP";
+
+            const optionb = document.createElement("option");
+            optionb.value = option1.value == "TCP" ? "HTTP" : "TCP";
+            optionb.text = option1.value == "TCP" ? "HTTP" : "TCP";
+
+            newSelect.appendChild(optionA);
+            newSelect.appendChild(optiona);
+            newSelect.appendChild(optionb);
+            ModeSelectDiv.appendChild(newSelect);
+            // ModeSelectDiv.appendChild(newSelect);
+
+            newSelect.addEventListener('change', function () {
+                event.preventDefault();
+                if (newSelect.value.trim() != "") {
+                    newJsonData[newJsonData.length - 1].data.mode = newSelect.value.toLowerCase();
+                    // secondnewJsonData[j].data.balance.mode = newSelect.value.toLowerCase();
+                }
+            })
+
+            // Create the "-" button
+            const removeButtonDiv = document.createElement("div");
+            removeButtonDiv.classList.add("remove-btnclass");
+            removeButtonDiv.style.marginLeft = "23.5%";
+            removeButtonDiv.style.display = "flex";
+            removeButtonDiv.style.marginTop = "2%";
+            // removeButtonDiv.style.marginBottom = "";
+
+            const removeButtonBackend1 = document.createElement('i');
+            removeButtonBackend1.classList.add('fas', 'fa-trash', 'fa-sm');
+            removeButtonBackend1.style.float = "right";
+            // removeButtonBackend1.classList.add("btn", "btn-danger");
+            removeButtonDiv.appendChild(removeButtonBackend1);
+
+            removeButtonBackend1.addEventListener("click", function () {
+                window.location.reload(true);
+                newJsonData && newJsonData.map((x, index) => {
+                    if (x.data.name == backendInputField.value) {
+                        newJsonData.splice(index, 1);
+                    }
+                })
+                containerDiv.removeChild(allbackendaddContainer);
+            });
+            // const breakpoint = document.createElement("br");
+
+            removeButtonDiv.appendChild(document.createElement("br"));
+
+            const breakpoint1 = document.createElement("br");
+
+            backendSection.appendChild(backendlableDiv);
+            backendSection.appendChild(backendinputDiv);
+
+            balanceSection.appendChild(balancelableDiv);
+            balanceSection.appendChild(balanceSelectDiv);
+
+            ModeSection.appendChild(ModeLabelDiv);
+            ModeSection.appendChild(ModeSelectDiv);
+
+            // totalbalanceContainer.appendChild(addButtonDiv);
+            totalbalanceContainer.appendChild(backendSection);
+            totalbalanceContainer.appendChild(balanceSection);
+            totalbalanceContainer.appendChild(ModeSection);
+            totalbalanceContainer.appendChild(removeButtonDiv);
+            // const breakpoint = document.createElement("br");
+            allbackendaddContainer.appendChild(totalbalanceContainer);
+
+            containerDiv.appendChild(allbackendaddContainer);
+            allbackendaddContainer.appendChild(totalbalanceContainer);
+            // totalbalanceContainer.appendChild(document.createElement("br"));
+
+            containerDiv.appendChild(allbackendaddContainer);
+            allbackendaddContainer.appendChild(document.createElement("br"));
+
+            containerDiv.appendChild(document.createElement("br"));
+
+            newjson_index_servers++;
+            addServerFields(allbackendaddContainer, newJsonData.length - 1, 0);
+
+        }
+
+        function addServerFields(containerDiv, backendIndex, serverIndex, color) {
+
+            const ServerTable = document.createElement("table");
+            ServerTable.appendChild(document.createElement("br"));
+            ServerTable.classList.add("table");
+            ServerTable.id = 'serverTablenew';
+
+
+            if (serverheaderflag === 1) {
+                // const containerDiv1 = document.createElement('tr');
+
+                const headerRow = document.createElement('tr');
+                headerRow.style.marginLeft = "0.2cm";
+                // headerRow.style.display="flex";
+                // headerRow.style.justifyContent="space-between"
+
+
+                const headerLabels = ["Server Name", "IP/FQDN", "Port Number", "Check"];
+                for (const label of headerLabels) {
+                    const th = document.createElement("th");
+                    th.textContent = label;
+                    th.style.marginTop = "2%";
+                    headerRow.appendChild(th);
+                };
+                containerDiv.appendChild(headerRow);
+
+                const statementbreak = document.createElement("br");
+            }
+
+            const containerDiv1 = document.createElement('tr');
+            containerDiv1.style.backgroundColor = color;
+
+            if (window.innerWidth > 1300) {
+                containerDiv1.style.display = "flex";
+                containerDiv1.style.backgroundColor = color;
+
+            } else {
+                // containerDiv1.style.display = "block";
+                containerDiv1.style.display = "flex";
+                containerDiv1.style.backgroundColor = color;
+            }
+
+            window.addEventListener('resize', function () {
+                const innerWidth = window.innerWidth
+
+                if (innerWidth > 1300) {
+                    containerDiv1.style.display = "flex";
+                    containerDiv1.style.backgroundColor = color;
+
+                }
+                else {
+                    // containerDiv1.style.display = "block";
+                    containerDiv1.style.display = "flex";
+                    containerDiv1.style.backgroundColor = color;
+                }
+            })
+            // const addButtonDiv = document.createElement("div");
+            // addButtonDiv.classList.add("add-btn");
+
+            // const addButton = document.createElement('i');
+            // addButton.classList.add("add-btn");
+            // addButton.textContent = '+Add servers';
+            // addButton.classList.add('btn', 'btn-primary', 'mb-2');
+
+            // addButton.addEventListener('click', function () {
+            //     event.preventDefault();
+            //     console.log("this is for the server button");
+            //     addServerFields(containerDiv, backendIndex, serverIndex, color);
+            // })
+
+            // containerDiv.appendChild(document.createElement("br"));
+            // if (serverIndex === 0) {
+            //     containerDiv.appendChild(addButton);
+            // }
+
+            console.log("serveradded")
+            const removeButtonDiv = document.createElement("td");
+            removeButtonDiv.classList.add('remove-btn');
+            removeButtonDiv.style.marginLeft = "1.2%";
+
+            // removeButtonDiv.style.marginLeft = "4%";
+            // removeButtonDiv.style.marginBottom = "2%";
+            // removeButtonDiv.style.marginTop = "3.5%";
+            removeButtonDiv.style.backgroundColor = color;
+
+
+            const removeButton1 = document.createElement('button');
+            removeButton1.classList.add('fas', 'fa-trash', 'fa-sm');
+            removeButton1.classList.add('btn', 'btn-danger', 'mb-2');
+            removeButton1.classList.add('btn', 'btn-danger', 'remove-btn');
+
+            // removeButton1.style.float = "right";
+
+            removeButtonDiv.appendChild(removeButton1)
+            // removeButton1.classList.add("btn", "btn-danger");
+            serverIndex = serverIndex + 1;
+
+            removeButton1.addEventListener("click", function () {
+                event.preventDefault();
+                window.location.reload(true);
+                serverIndexToRemove = serverIndex;
+                backendIndexTOremove = backendIndex;
+                newJsonData[backendIndex].server.splice(serverIndex, 1);
+                // console.log("indedx", backendIndex, serverIndex);
+                containerDiv.removeChild(tableRow);
+            });
+
+            const newServerSection = document.createElement('div');
+
+            //server Section
+            if (flag == 0) {
+                console.log("Zero is working")
+                newJsonData[backendIndex].server.push({ type: "new", data: { name: "", address: "", port: "", check: "disabled" } })
+            } else {
+                newJsonData[newJsonData.length - 1].server.push({ type: "new", data: { name: "", address: "", port: "", check: "disabled" } })
+            }
+
+            const tableRow = document.createElement('tr');
+
+            // tableRow.appendChild(document.createElement("br"))
+
+
+            const serverInputDiv = document.createElement("td");
+            serverInputDiv.style.marginLeft = "2%";
+            serverInputDiv.style.marginRight = "2%";
+            serverInputDiv.style.backgroundColor = color;
+
+            const inputField1 = document.createElement('input');
+            inputField1.type = "text";
+            inputField1.placeholder = "Enter server name";
+            inputField1.classList.add("aclnewInput");
+            inputField1.required = true;
+
+            inputField1.addEventListener('input', () => {
+                event.preventDefault();
+                if (flag == 0) {
+                    newJsonData[backendIndex].server[newJsonData[backendIndex].server.length - 1].data.name = inputField1.value;
+                } else {
+                    newJsonData[newJsonData.length - 1].server[newJsonData[newJsonData.length - 1].server.length - 1].data.name = inputField1.value;
+                }
+            })
+
+            serverInputDiv.appendChild(inputField1);
+            tableRow.appendChild(serverInputDiv);
+
+            const criterionInputDiv = document.createElement("td");
+            criterionInputDiv.style.marginLeft = "2%";
+            criterionInputDiv.style.marginRight = "2%";
+            criterionInputDiv.style.backgroundColor = color;
+
+
+            const inputField2 = document.createElement('input');
+            inputField2.type = "text";
+            inputField2.placeholder = "Enter IP Address";
+            inputField2.classList.add("aclnewInput");
+            inputField2.required = true;
+            // inputField2.classList.add("criterion2-select");
+
+            inputField2.addEventListener('input', () => {
+                event.preventDefault();
+
+                if (flag == 0) {
+                    newJsonData[backendIndex].server[newJsonData[backendIndex].server.length - 1].data.address = inputField2.value;
+                } else {
+                    newJsonData[newJsonData.length - 1].server[newJsonData[newJsonData.length - 1].server.length - 1].data.address = inputField2.value;
+                }
+            })
+
+            criterionInputDiv.appendChild(inputField2);
+            tableRow.appendChild(criterionInputDiv);
+
+            const indexinputDiv = document.createElement("td");
+            indexinputDiv.style.marginLeft = "2%";
+            indexinputDiv.style.marginRight = "2%";
+            indexinputDiv.style.backgroundColor = color;
+
+            const inputField3 = document.createElement('input');
+            inputField3.type = "number";
+            inputField3.placeholder = "Enter Port";
+            inputField3.classList.add("portnewInput");
+            // inputField3.setAttribute("required", true);
+            inputField3.required = true;
+
+
+            inputField3.addEventListener('input', () => {
+                event.preventDefault();
+
+                if (flag == 0) {
+                    newJsonData[backendIndex].server[newJsonData[backendIndex].server.length - 1].data.port = parseInt(inputField3.value);
+                } else {
+                    newJsonData[newJsonData.length - 1].server[newJsonData[newJsonData.length - 1].server.length - 1].data.port = parseInt(inputField3.value);
+                }
+            });
+
+            indexinputDiv.appendChild(inputField3);
+            tableRow.appendChild(indexinputDiv);
+
+
+            const valueinputDiv = document.createElement("td");
+            valueinputDiv.style.marginLeft = "2%";
+            valueinputDiv.style.marginRight = "2%";
+            valueinputDiv.style.backgroundColor = color;
+
+            const newSelect = document.createElement("Select");
+            newSelect.name = "field";
+            newSelect.classList.add("checknewInput");
+            newSelect.required = true;
+
+            newSelect.addEventListener('change', () => {
+                event.preventDefault();
+                if (flag == 0) {
+                    newJsonData[backendIndex].server[newJsonData[backendIndex].server.length - 1].data.check = newSelect.value == "" ? "disabled" : "enabled";;
+                } else {
+                    newJsonData[newJsonData.length - 1].server[newJsonData[newJsonData.length - 1].server.length - 1].data.check = newSelect.value == "" ? "disabled" : "enabled";
+                }
+            })
+            // check.push(newSelect.value + "_" + j);
+            const option1 = document.createElement("option");
+            option1.value = "enabled";
+            option1.text = "enabled";
+
+            const option2 = document.createElement("option");
+            option2.value = "disabled";
+            option2.text = "disabled";
+
+            newSelect.appendChild(option2);
+            newSelect.appendChild(option1);
+
+            valueinputDiv.appendChild(newSelect);
+            tableRow.appendChild(valueinputDiv);
+
+            const removeButton = document.createElement("button");
+            removeButton.classList.add("remove-btn");
+            removeButton.style.marginLeft = "2%";
+            removeButton.style.marginTop = "3.5%";
+            removeButton.style.marginBottom = "2%";
+            removeButton.classList.add('fas', 'fa-trash', 'fa-sm');
+            removeButton.addEventListener("click", function () {
+                bindAddress.removeChild(containerDiv);
+            });
+
+
+            const statementbreak = document.createElement("br");
+
+            // containerDiv1.appendChild(removeButtonDiv)
+            tableRow.appendChild(removeButtonDiv);
+
+            containerDiv.appendChild(tableRow);
+
+            // if (serverheaderflag === 1) {
+            //     console.log("serverflag is working");
+            //     ServerTable.appendChild(tableRow);
+            //    
+            //     serverheaderflag = 0;
+            // } 
+            // else {
+            //     console.log("this  is working for the new sever");
+
+            //     containerDiv.appendChild(tableRow);
+            // }
+            flag = 0;
+        }
+
+        const backendContainer = document.getElementById('backendContainer');
+
+        const addButtonDiv1 = document.createElement("div");
+        addButtonDiv1.classList.add("add-btn");
+
+        const addButtonBackend = document.createElement('i');
+        addButtonBackend.classList.add("add-btn");
+        addButtonBackend.textContent = '+Add Backend';
+        addButtonBackend.classList.add('btn', 'btn-primary', 'mb-2');
+
+        addButtonDiv1.appendChild(addButtonBackend);
+        backendContainer.appendChild(addButtonDiv1);
+        backendContainer.appendChild(addButtonBackend);
+
+        const inputField = document.createElement('input');
+        inputField.type = "text";
+        inputField.classList.add("aclnewInput")
+
+        addButtonBackend.addEventListener('click', function () {
+            event.preventDefault();
+            window.scrollTo(0, 10000);
+            addBackendFields(backendContainer, inputField.value);
+
+        })
+
+        console.log("JsonDataFrom Api", jsonData)
+
+
+        for (let j = 0; j < jsonData.length; j++) {
+
+            console.log("JsonDataFrom Api", jsonData)
+            console.log("the new json is empy ", newJsonData);
+            const servercontainer = document.createElement('div');
+
+            var hrElement = document.createElement("hr");
+            backendContainer.appendChild(hrElement);
+
+            const superaddcontainer1 = document.createElement('div');
+
+            if (window.innerWidth > 1300) {
+                superaddcontainer1.style.display = "flex";
+
+            } else {
+                // superaddcontainer1.style.display = "block";
+                superaddcontainer1.style.display = "flex";
+
+            }
+
+            window.addEventListener('resize', function () {
+                const innerWidth = window.innerWidth
+                if (innerWidth > 1300) {
+                    superaddcontainer1.style.display = "flex";
+
+                }
+                else {
+                    // superaddcontainer1.style.display = "block";
+                    superaddcontainer1.style.display = "flex";
+
+                }
+            })
+
+            // Create the "-" button
+            const removeButtonDiv1 = document.createElement("div");
+            removeButtonDiv1.classList.add("remove-btnclass");
+            removeButtonDiv1.style.marginLeft = "2%";
+            removeButtonDiv1.style.marginBottom = "2%";
+            removeButtonDiv1.style.marginTop = "3%";
+
+            const removeButtonBackend = document.createElement('i');
+            removeButtonBackend.classList.add("remove-btn");
+            removeButtonBackend.style.marginTop = "2%";
+            removeButtonBackend.style.marginLeft = "23%";
+            removeButtonBackend.classList.add('fas', 'fa-trash', 'fa-sm');
+            removeButtonBackend.style.float = "right";
+            removeButtonDiv1.appendChild(removeButtonBackend);
+            removeButtonBackend.addEventListener("click", function () {
+                event.preventDefault();
+                var csrfToken = "{{ csrf_token() }}";
+                var headers = new Headers();
+                headers.append('Content-Type', 'application/json');
+                headers.append('X-CSRFToken', csrfToken); // Include the CSRF token here
+                deletebackendfirst = newJsonData[j].data.name;
+
+                if (window.confirm("Are you want to delete")) {
+                    fetch('/delete_backend', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify({ backend: deletebackendfirst })
+                    })
+                        .then(response => {
+
+                            if (response.status === 200) {
+                                window.location.reload(true);
+                                return response.json();
+                            } else if (response.status === 404) {
+                                console.error('backend not found');
+                            }
+                        })
+                        .then(jsonData => {
+                            if (jsonData && jsonData.error !== undefined) {
+                                if (jsonData.error === 1) {
+                                    window.location.reload(true);
+                                    alert("You are not sudo user!");
+                                } else if (jsonData.error === 0) {
+                                    alert("Backend deleted successfully");
+                                } else {
+                                    console.error('Unexpected error value:', jsonData.error);
+                                }
+                            }
+                        })
+
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Handle other errors
+                        });
+
+                    console.log("Deleted Backend name is = ", newJsonData[j].data.name);
+                    newJsonData.splice(j, 1);
+                    backendContainer.removeChild(servercontainer);
+                }
+            });
+
+
+            // const totalbackendContainer = document.createElement('div');
+            // totalbackendContainer.classList.add('backend1-container', 'first-population');
+
+            const backendSection = document.createElement("div");
+            backendSection.style.display = "flex";
+            // backendSection.style.marginLeft = "4%";
+            backendSection.style.marginTop = "1.5%";
+
+            const backendlableDiv = document.createElement('div');
+            backendlableDiv.style.marginLeft = "2%";
+
+            const label = document.createElement('label');
+            label.textContent = "Backend : ";
+            label.classList.add("backendservernewLabel");
+
+            backendlableDiv.appendChild(label);
+
+            const backendinputDiv = document.createElement("div");
+            backendinputDiv.style.marginLeft = "2%";
+            backendinputDiv.style.marginRight = "2%";
+
+            const inputField = document.createElement('input');
+            inputField.type = "text";
+            inputField.classList.add("aclnewInput")
+            inputField.value = jsonData[j].backend.name;
+            inputField.style.marginTop = "-4%";
+            inputField.id = 'backendid';
+            backendinputDiv.appendChild(inputField);
+
+            backendSection.appendChild(backendlableDiv);
+            backendSection.appendChild(backendinputDiv);
+
+
+            if (j >= 0 && j < newJsonData.length) {
+                newJsonData[j].data.name = inputField.value;
+                newJsonData[j].type = "old"
+            } else if (j >= newJsonData.length) {
+                // Increase the range and insert additional values
+                // console.log("else if is working")
+                while (j >= newJsonData.length) {
+                    newJsonData.push({ type: "old", data: { balance: {} }, server: [{ data: {}, type: "old" }] })
+                }
+                newJsonData[j].data.name = inputField.value;
+            }
+
+            inputField.addEventListener('input', () => {
+                event.preventDefault();
+                newJsonData[j].data.name = inputField.value;
+            })
+
+            const balanceSection = document.createElement("div");
+            balanceSection.style.display = "flex";
+            balanceSection.style.marginLeft = "4%";
+            balanceSection.style.marginTop = "1.5%";
+
+            const balancelableDiv = document.createElement('div');
+            balancelableDiv.classList.add("balance-lable-cnt1");
+            balancelableDiv.style.marginLeft = "2%";
+
+            const balancelabel = document.createElement('label');
+            balancelabel.textContent = "Balance : ";
+            balancelabel.classList.add("backendservernewLabel", "showInfo");
+            // balancelabel.classList.add("addservernewLabel","showInfo");
+            balancelabel.setAttribute("data-tooltip", "Specify the load-balancing algorithm for distributing traffic among backend servers");
+
+            balancelableDiv.appendChild(balancelabel);
+
+            const balanceSelectDiv = document.createElement("div");
+            balanceSelectDiv.style.marginLeft = "2%";
+            balanceSelectDiv.style.marginRight = "2%";
+
+            // balanceSelectDiv.classList.add("balance-select1");
+
+            const balanceSelect = document.createElement('select');
+            balanceSelect.name = "field";
+            balanceSelect.classList.add("aclnewInput")
+            balanceSelect.style.marginTop = "-4%";
+
+            // balanceSelect.classList.add("balance-select1");
+            // balanceSelect.value = "leastconn"
+            const apiValue = jsonData[j].backend.balance.algorithm;
+            balanceSelect.value = apiValue;
+
+
+            const option0 = document.createElement("option");
+            option0.value = "Select";
+            option0.text = "Select";
+            const option1 = document.createElement("option");
+            option1.value = "roundrobin";
+            option1.text = "roundrobin";
+            const option2 = document.createElement("option");
+            option2.value = "static-rr";
+            option2.text = "static-rr";
+            const option3 = document.createElement("option");
+            option3.value = "leastconn";
+            option3.text = "leastconn";
+            const option4 = document.createElement("option");
+            option4.value = "first";
+            option4.text = "first";
+            const option5 = document.createElement("option");
+            option5.value = "source";
+            option5.text = "source";
+            const option6 = document.createElement("option");
+            option6.value = "uri";
+            option6.text = "uri";
+            const option7 = document.createElement("option");
+            option7.value = "url_param";
+            option7.text = "url_param";
+            const option8 = document.createElement("option");
+            option8.value = "hdr";
+            option8.text = "hdr";
+            const option9 = document.createElement("option");
+            option9.value = "random";
+            option9.text = "random";
+
+            const option10 = document.createElement("option");
+            option10.value = "rdp-cookie";
+            option10.text = "rdp-cookie";
+
+            const option11 = document.createElement("option");
+            option11.value = "hash";
+            option11.text = "hash";
+            // console.log("testpurpose", newJsonData[j].data)
+
+            newJsonData[j].data.balance.algorithm = jsonData[j].backend.balance.algorithm;
+            // console.log("Before setting the value");
+
+            balanceSelect.value = jsonData[j].backend.balance.algorithm;
+            // console.log("After setting the value");
+
+            console.log("Value from jsonData", jsonData[j].backend.balance.algorithm, "roundrobin" === jsonData[j].backend.balance.algorithm);
+            balanceSelect.addEventListener('change', () => {
+                event.preventDefault();
+                // console.log("Select changed to: ", balanceSelect.value)
+                newJsonData[j].data.balance.algorithm = balanceSelect.value;
+            });
+
+            balanceSelect.appendChild(option0);
+            balanceSelect.appendChild(option1);
+            balanceSelect.appendChild(option2);
+            balanceSelect.appendChild(option3);
+            balanceSelect.appendChild(option4);
+            balanceSelect.appendChild(option5);
+            balanceSelect.appendChild(option6);
+            balanceSelect.appendChild(option7);
+            balanceSelect.appendChild(option8);
+            balanceSelect.appendChild(option9);
+            balanceSelect.appendChild(option10);
+            balanceSelect.appendChild(option11);
+
+            for (let option of balanceSelect.options) {
+                if (option.value === apiValue) {
+                    option.selected = true;
+                }
+            }
+            balanceSelectDiv.appendChild(balanceSelect);
+
+            balanceSection.appendChild(balancelableDiv);
+            balanceSection.appendChild(balanceSelectDiv);
+
+
+            const ModeSection = document.createElement("div");
+            ModeSection.style.display = "flex";
+            ModeSection.style.marginLeft = "4%";
+            ModeSection.style.marginTop = "1.5%";
+
+            const ModeLabelDiv = document.createElement("div");
+            ModeLabelDiv.classList.add("mode-lable-cnt1");
+            ModeLabelDiv.style.marginLeft = "2%";
+
+            const Modelabel = document.createElement("label");
+            Modelabel.textContent = "Mode:";
+            // Modelabel.classList.add("servernewLabel");
+            Modelabel.classList.add("backendservernewLabel", "showInfo");
+            Modelabel.setAttribute("data-tooltip", "Define the mode of operation for the backend servers. Options include 'TCP' for raw TCP communication, 'http' for HTTP traffic processing.");
+
+            ModeLabelDiv.appendChild(Modelabel);
+
+            const ModeSelectDiv = document.createElement("div");
+            ModeSelectDiv.style.marginLeft = "2%";
+            ModeSelectDiv.style.marginRight = "2%";
+
+            const newSelect = document.createElement("Select");
+            newSelect.name = "field";
+            newSelect.classList.add("aclnewInput")
+            newSelect.style.marginTop = "-4%";
+
+            const apiValue2 = jsonData[j]?.backend?.mode;
+            newSelect.value = apiValue2;
+
+            const optiona = document.createElement("option");
+            optiona.value = jsonData[j].backend.mode.toUpperCase() == "TCP" ? "TCP" : "HTTP";
+            optiona.text = jsonData[j].backend.mode.toUpperCase() == "TCP" ? "TCP" : "HTTP";
+
+            const optionb = document.createElement("option");
+            optionb.value = optiona.value == "TCP" ? "HTTP" : "TCP";
+            optionb.text = optiona.value == "TCP" ? "HTTP" : "TCP";
+
+            newJsonData[j].data.mode = jsonData[j]?.backend?.mode;
+            console.log("After Mode the value", jsonData[j]?.backend?.mode);
+
+            if (jsonData[j].backend.mode != "") {
+                newJsonData[j].data.mode = jsonData[j]?.backend?.mode.toLowerCase();
+            }
+
+            newJsonData[j].data.mode = jsonData[j]?.backend?.mode;
+
+            newSelect.value = jsonData[j]?.backend?.mode;
+            console.log("Value from jsonData new is this", jsonData[j].backend.mode);
+            console.log("value", newSelect.value);
+
+            newSelect.addEventListener('change', function () {
+                event.preventDefault();
+                if (newSelect.value.trim() != "") {
+                    newJsonData[j].data.mode = newSelect.value.toLowerCase();
+                }
+            })
+            ModeSelectDiv.appendChild(newSelect);
+
+            newSelect.appendChild(optiona);
+            newSelect.appendChild(optionb);
+
+            for (let option of newSelect.options) {
+                if (option.value === apiValue2) {
+                    option.selected = true;
+                }
+            }
+            ModeSection.appendChild(ModeLabelDiv);
+            ModeSection.appendChild(ModeSelectDiv);
+
+            // superaddcontainer1.appendChild(addButtonDiv1);
+            superaddcontainer1.appendChild(backendSection);
+            superaddcontainer1.appendChild(balanceSection);
+            superaddcontainer1.appendChild(ModeSection);
+            superaddcontainer1.appendChild(removeButtonBackend);
+
+            // superaddcontainer1.appendChild(removeButtonDiv1);
+            servercontainer.appendChild(superaddcontainer1);
+            // servercontainer.appendChild(BackendTable);
+            backendContainer.appendChild(servercontainer);
+
+
+            const dataIsFromAPI = true;
+            let serverLength = jsonData[j]?.server?.data?.length > 0 ? jsonData[j]?.server?.data?.length : 1
+
+
+            const totaladdcontainer = document.createElement('td');
+            totaladdcontainer.classList.add('total-container');
+            totaladdcontainer.style.display = "flex";
+
+
+
+            function handleDelete(event, i, j, containerDiv, superaddcontainer) {
+                event.preventDefault();
+                var csrfToken = "{{ csrf_token() }}";
+                var headers = new Headers();
+                headers.append('Content-Type', 'application/json');
+                headers.append('X-CSRFToken', csrfToken);
+                console.log("newJsonData[j]?.server[i]?.data?.name", newJsonData[j]?.server[i])
+                deleteserver = newJsonData[j]?.server[i]?.data?.name;
+
+                deletebackendfirst = newJsonData[j].data.name;
+
+                if (window.confirm("Are you want to delete")) {
+                    console.log("deleteserver", deletebackendfirst, deleteserver);
+                    fetch('/delete_server', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify({ backend: deletebackendfirst, server: deleteserver }), // Send the backend and server names to delete
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                const table = document.getElementById('serverTable');
+                                table.deleteRow(i + 1);
+                                console.log("new", newJsonData[j]);
+                                newJsonData[j].server.splice(i, 1);
+                                alert("Server deleted successfully");
+                                window.location.reload(true);
+
+                                // containerDiv.removeChild(superaddcontainer);
+                            } else {
+                                console.error('Error:', response.statusText);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Handle other errors
+                        });
+
+                    containerDiv.removeChild(superaddcontainer);
+                }
+            };
+            function createDeleteButton(tableRow, i, j, containerDiv, superaddcontainer) {
+                const removeButtonCell = document.createElement('td');
+                const removeBindButton = document.createElement('button');
+                removeBindButton.classList.add('fas', 'fa-trash', 'fa-sm');
+                removeBindButton.classList.add('btn', 'btn-danger', 'mb-2');
+                removeBindButton.classList.add('btn', 'btn-danger', 'remove-btn');
+
+                removeBindButton.addEventListener('click', (event) => {
+                    handleDelete(event, i, j, containerDiv, superaddcontainer);
+                });
+                removeButtonCell.appendChild(removeBindButton);
+                tableRow.appendChild(removeButtonCell);
+            }
+
+            const ServerTable = document.createElement("table");
+            ServerTable.classList.add("table");
+            ServerTable.id = 'serverTable';
+
+            for (let i = 0; i < serverLength; i++) {
+
+
+                if (i == 0) {
+
+
+                    const headerRow = document.createElement('tr');
+                    headerRow.style.marginLeft = "2%";
+                    const headerLabels = ["Server Name", "IP/FQDN", "Port Number", "Check"];
+                    for (const label of headerLabels) {
+                        const th = document.createElement("th");
+                        th.textContent = label;
+                        th.style.marginLeft = "2%";
+                        headerRow.appendChild(th);
+                    };
+                    ServerTable.appendChild(headerRow);
+                }
+                // jsonData[j].server.type = "old";
+                const containerDiv = document.createElement('div');
+                const superaddcontainer = document.createElement('div');
+
+                if (window.innerWidth > 1300) {
+                    superaddcontainer.style.display = "flex";
+                    superaddcontainer.style.backgroundColor = colors[j % 2];
+
+                } else {
+                    // superaddcontainer.style.display = "block";
+                    superaddcontainer.style.display = "flex";
+                    superaddcontainer.style.backgroundColor = colors[j % 2];
+                }
+                window.addEventListener('resize', function () {
+                    const innerWidth = window.innerWidth
+                    if (innerWidth > 1300) {
+                        superaddcontainer.style.display = "flex";
+                        superaddcontainer.style.backgroundColor = colors[j % 2];
+                    }
+                    else {
+                        // superaddcontainer.style.display = "block";
+                        superaddcontainer.style.display = "flex";
+                        superaddcontainer.style.backgroundColor = colors[j % 2];
+                    }
+                })
+
+                const tableRow = document.createElement('tr');
+                tableRow.style.backgroundColor = colors[j % 2];
+                tableRow.style.borderRadius = "8px";
+
+                const addButtonDiv = document.createElement("td");
+                addButtonDiv.classList.add("add-btn");
+                const addButton = document.createElement('i');
+                addButton.classList.add("add-btn");
+                addButton.textContent = '+Add servers';
+                addButton.classList.add('btn', 'btn-primary', 'mb-2');
+                console.log("working");
+                addButtonDiv.appendChild(addButton);
+
+                if (i == 0) {
+                    totaladdcontainer.appendChild(addButtonDiv);
+                    console.log("not working");
+                }
+
+                addButton.addEventListener('click', function () {
+                    event.preventDefault();
+                    // window.scrollTo(0, 10000);
+
+                    console.log("add button for server isnot working");
+
+                    newjson_index_servers++;
+                    // backendContainer.appendChild(ServerTable);
+                    addServerFields(ServerTable, j, i, colors[j % 2]);
+                })
+
+                // const removeButtonDiv = document.createElement("td");
+                // removeButtonDiv.classList.add("remove-btn");
+                // removeButtonDiv.style.marginLeft = "2%";
+                // removeButtonDiv.style.marginBottom = "2%";
+                // removeButtonDiv.style.marginTop = "3%";
+                // const removeButton1 = document.createElement('button');
+                // removeButton1.classList.add('fas', 'fa-trash', 'fa-sm');
+                // removeButton1.style.float = "right";
+                // removeButtonDiv.appendChild(removeButton1);
+                // removeButton1.addEventListener("click", function () {
+                //     serverIndexToRemove = i;
+                //     backendIndexTOremove = j;
+                //     event.preventDefault();
+                //     var csrfToken = "{{ csrf_token() }}";
+                //     var headers = new Headers();
+                //     headers.append('Content-Type', 'application/json');
+                //     headers.append('X-CSRFToken', csrfToken); // Include the CSRF token here
+                //     deleteserver = newJsonData[j].server[i].data.name;
+                //     deletebackendfirst = newJsonData[j].data.name;
+                //     console.log("deletebackend name", deleteserver, deletebackendfirst)
+
+                // });
+                // ServerTable.appendChild(tableRow);
+
+                // superaddcontainer.appendChild(removeButton1);
+
+                const serverInputDiv = document.createElement("td");
+                const inputField1 = document.createElement('input');
+                inputField1.type = "text";
+                if (serverLength !== 0 && newJsonData[j].server[i] && jsonData[j]?.server?.data[i]) {
+                    console.log("1 is working");
+                    newJsonData[j].server[i].data.name = newJsonData[j].server[i].data || {}; // Ensure data object exists
+
+                    console.log("jsonData[j]?.server?.data[i]?.name;", jsonData[j]?.server?.data[i]?.name)
+                    newJsonData[j].server[i].data.name = jsonData[j]?.server?.data[i]?.name;
+                }
+
+                // if (serverLength !== 0) {
+                //     console.log("1 is working")
+                //     newJsonData[j].server[i].data.name = jsonData[j].server?.data[i]?.name;
+                // }
+                try {
+                    inputField1.value = jsonData[j].server?.data[i]?.name;
+                } catch (e) {
+                }
+                inputField1.classList.add("aclnewInput");
+                if (dataIsFromAPI) {
+
+                    inputField1.setAttribute("readonly", true);
+                }
+
+                if (newJsonData[j] && newJsonData[j].server && newJsonData[j].server[i]) {
+                    if (serverLength !== 0) {
+                        console.log("2 is working");
+                        newJsonData[j].server[i].data = newJsonData[j].server[i].data || {};
+                        newJsonData[j].server[i].data.name = jsonData[j]?.server?.data[i]?.name;
+                    }
+                    newJsonData[j].server[i].type = "old";
+                } else if (i >= newJsonData[j].server.length) {
+                    while (i >= newJsonData[j].server.length) { // Insert new values
+                        newJsonData[j].server.push({ type: "old", data: { name: "", address: "", port: "", check: "disabled" } });
+                    }
+                }
+
+                // if (i >= 0 && i < newJsonData[j].server.length > 0) {
+                //     if (serverLength !== 0) {
+                //         console.log("2 is working")
+                //         newJsonData[j].server[i].data.name = inputField1.value;
+                //     }
+                //     newJsonData[j].server[i].type = "old"
+                // } else if (i >= newJsonData[j].server.length) {
+                //     while (i >= newJsonData[j].server.length) { // Insert new values
+                //         newJsonData[j].server.push({ type: "old", data: { name: "", address: "", port: "", check: "disabled" } })
+                //     }
+                //     // newJsonData[j].server[i].data.name = inputField1.value;
+
+                // }
+
+                newJsonData[j].server[i].data.name = inputField1.value;
+
+
+                inputField1.addEventListener('input', () => {
+                    event.preventDefault();
+                    newJsonData[j].server[i].data.name = inputField1.value;
+                }
+                );
+
+                serverInputDiv.appendChild(inputField1);
+                tableRow.appendChild(serverInputDiv);
+
+                const criterionInputDiv = document.createElement("td");
+                criterionInputDiv.style.marginLeft = "2%";
+                criterionInputDiv.style.marginRight = "2%";
+
+                const inputField2 = document.createElement('input');
+                inputField2.type = "text";
+                if (serverLength !== 0) {
+                    console.log("5 is working")
+
+                    newJsonData[j].server[i].data.address = jsonData[j]?.server?.data[i]?.address;
+
+                }
+
+                try {
+                    inputField2.value = jsonData[j]?.server?.data[i]?.address;
+                } catch (e) {
+
+                }
+
+                inputField2.classList.add("ipnewInput");
+                // inputField2.disabled = true;
+
+                inputField2.addEventListener('input', () => {
+                    event.preventDefault();
+                    newJsonData[j].server[i].data.address = inputField2.value; // Update the value
+                }
+                );
+
+                criterionInputDiv.appendChild(inputField2);
+                if (jsonData[j]?.server?.data?.length > 0) {
+                    tableRow.appendChild(criterionInputDiv);
+                }
+
+                const indexinputDiv = document.createElement("td");
+                indexinputDiv.style.marginLeft = "2%";
+                indexinputDiv.style.marginRight = "2%";
+
+                const inputField3 = document.createElement('input');
+                inputField3.type = "number";
+                if (serverLength !== 0) {
+                    console.log("7 is working")
+
+                    newJsonData[j].server[i].data.port = jsonData[j]?.server?.data[i]?.port;
+                }
+                try {
+                    inputField3.value = jsonData[j].server?.data[i]?.port;
+                } catch (e) {
+
+                }
+
+                inputField3.classList.add("portnewInput");
+
+                // newJsonData[j].server[i].data.port = parseInt(inputField3.value);
+
+                inputField3.addEventListener('input', () => {
+                    event.preventDefault();
+                    newJsonData[j].server[i].data.port = parseInt(inputField3.value); // Update the value
+                }
+                );
+
+                indexinputDiv.appendChild(inputField3);
+                if (jsonData[j]?.server?.data?.length > 0) {
+                    tableRow.appendChild(indexinputDiv);
+                }
+                // tableRow.appendChild(indexinputDiv);
+
+                const valueinputDiv = document.createElement("td");
+                valueinputDiv.style.marginLeft = "2%";
+                valueinputDiv.style.marginRight = "2%";
+
+                const newSelect2 = document.createElement("select");
+                newSelect2.name = "field";
+                newSelect2.classList.add("checknewInput");
+
+                const apiValuenew = jsonData[j]?.server?.data[i]?.check;
+                newSelect2.value = apiValuenew;
+                newSelect2.value = jsonData[j]?.server?.data[i]?.check
+                try {
+                    console.log("checkvalue", jsonData[j].server?.data[i]?.check === "enabled");
+                    newSelect2.text = jsonData[j].server?.data[i]?.check
+                    newSelect2.value = jsonData[j].server?.data[i]?.check
+                    if (serverLength !== 0) {
+                        console.log("8 is working")
+
+                        newJsonData[j].server[i].data.check = jsonData[j]?.server?.data[i]?.check
+                    }
+                } catch {
+
+                }
+                newSelect2.addEventListener('input', () => {
+                    event.preventDefault();
+                    newJsonData[j].server[i].data.check = newSelect2.value;
+                }
+                );
+                const optionN = document.createElement("option");
+                try {
+                    optionN.value = jsonData[j]?.server?.data[i]?.check
+                    optionN.text = jsonData[j]?.server?.data[i]?.check
+                } catch (e) {
+                    option1.value = "disabled";
+                    option1.text = "disabled";
+                }
+
+                const optionA = document.createElement("option");
+                console.log("At option 2 ", optionN.value, optionN.value === "disabled")
+                optionA.value = optionN.value === "disabled" ? "enabled" : "disabled";
+                optionA.text = optionN.value === "disabled" ? "enabled" : "disabled";
+
+                newSelect2.appendChild(optionN);
+                newSelect2.appendChild(optionA);
+
+                for (let option of newSelect2.options) {
+                    if (option.value === apiValuenew) {
+                        option.selected = true;
+                    }
+                }
+                valueinputDiv.appendChild(newSelect2);
+                if (jsonData[j]?.server?.data?.length > 0) {
+                    tableRow.appendChild(valueinputDiv);
+                }
+                // tableRow.appendChild(valueinputDiv);
+                createDeleteButton(tableRow, i, j, containerDiv, superaddcontainer);
+                if (jsonData[j]?.server?.data?.length > 0) {
+                    // rowContainer.appendChild(tableRow);
+                    ServerTable.appendChild(tableRow)
+                }
+
+                // const statementbreak = document.createElement("br");
+                if (i == 0) {
+                    backendContainer.appendChild(totaladdcontainer);
+                }
+
+                console.log("totaladdcontainer", totaladdcontainer);
+                if (jsonData[j]?.server?.data?.length > 0) {
+                    backendContainer.appendChild(ServerTable);
+                }
+            }
+        }
+    </script>
+
+    </div>
+    <script src="../static/scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+</body>
+
+</html>

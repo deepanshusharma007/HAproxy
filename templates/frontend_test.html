@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap5.min.css') }}">
+    <title>HAPROXY LB</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index1.css') }}">
+    <link href='https://use.fontawesome.com/releases/v5.7.2/css/all.css' rel='stylesheet'>
+
+</head>
+
+<body>
+
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar-->
+        <div class="border-end bg-white" id="sidebar-wrapper">
+            <div id="titlehead" class="sidebar-heading border-bottom bg-light">
+                <p class="ptag" style="font-weight: bold;align-items: center;margin-left: 20%;">HAPROXY</p>
+            </div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/global">Global</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/default">Defaults</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/backend">Backend</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" id="frontend"
+                    href="#">Frontend</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/acl_lines">ACL</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                    href="/backend_switching_rule">Swiching rules</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/stats">Stats</a>
+                <br />
+                <br />
+                <br />
+
+                <a class="btn btn-primary" href="/deploy_config" id="finalSubmit">Final Submit</a>
+
+            </div>
+
+        </div>
+        <div id="page-content-wrapper">
+            <!-- Top navigation-->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <div class="centered-container">
+                        <div class="NavigationToggleBar">
+                            <button class="custom-navbar-toggler" id="sidebarToggle">
+                                <img src="{{ url_for('static', filename='/chevron-left.svg') }}" id="chevronIcon">
+                            </button>
+                        </div>
+                        <div id="panel-heading" class="Lbsetting"> HA-PROXY CONFIG MANAGER </div>
+                    </div>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation"><span
+                            class="navbar-toggler-icon"></span></button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mt-2 mt-lg-1">
+                            <li class="nav-item active"><a class="nav-link" id="titlehead" href="/">Home</a></li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false" id="titlehead">Options</a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenu">
+                                    <li>
+                                        <a class="dropdown-item" href="/global">Configuration</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/current_haproxy">Current Config-view</a>
+
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/list_config">Deployment history</a>
+
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">HA Proxy Actions </a>
+                                        <ul class="dropdown-menu dropdown-submenu dropdown-submenu-left">
+                                            <li>
+                                                <a class="dropdown-item" id="restartButton" href="/">Restart HA
+                                                    Proxy</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" id="stopButton" href="/">Stop HA Proxy</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" id="startButton" href="/">Start HA Proxy</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/journal">HA Proxy Journal Logs</a>
+
+                                    </li>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="/logout">Logout</a>
+                                </ul>
+                            </li>
+                            <li class="nav-item active"><a class="nav-link" id="titlehead" href=""> <span
+                                        class="far fa-user p-2"></span>{{ session.get('user_name') }}</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <br />
+            <h3 style="margin-left: 2%;">Frontend Section</h3>
+            <div class="container mt-4">
+                <form>
+                    <div id="frontendContainer"></div>
+                </form>
+                <hr />
+            </div>
+            <div class="d-flex justify-content-center align-items-center" style="margin-top: 1cm;padding-bottom: 1cm;">
+                <button id="next" type="button" class="btn btn-primary">
+                    <a href="/backend" style="color: white; text-decoration: none;">Previous</a>
+                </button>
+                <button type="submit" id='save' class="btn btn-primary">Save</button>
+                <button id="next" type="button" class="btn btn-primary">
+                    <a href="/acl_lines" style="color: white; text-decoration: none;">Next</a>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!--<pre id="jsonOutput"></pre>-->
+
+    <script>
+
+        var path = window.location.href;
+
+        if (path.includes("frontend")) {
+            const frontend_id = document.getElementById("frontend");
+            frontend_id.style.backgroundColor = "rgb(231 231 231)";
+        }
+
+
+        var mydata = '{{ data }}';
+        var newJsonData = [{}];
+        var secondnewJsonData = [];
+        var selectedValues = []
+
+        var newjsonData = {};
+
+        if (!newJsonData[0].bind) {
+            newJsonData[0].bind = [{ type: "", data: { address: "", name: "", port: 0 } }]; // Create the backend object if it doesn't exist
+        }
+        if (!newJsonData[0].data) {
+            newJsonData[0].data = { compression: { algorithms: [], types: [] }, mode: "", name: "", default_backend: "" }; // Create the server object if it doesn't exist
+        }
+        const finalSubmitButton = document.getElementById('finalSubmit');
+        finalSubmitButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            const userConfirmed = confirm("Are you sure you want to submit?");
+            if (userConfirmed) {
+                window.location.href = '/deploy_config';
+            }
+        });
+        let x = "";
+        function saveInputValues() {
+            event.preventDefault();
+            console.log("new Json", newJsonData);
+
+            let SubmitFlag = 0;
+            secondnewJsonData && secondnewJsonData.forEach(a => {
+
+                a && a.bind && a.bind.forEach(b => {
+                    if (b && (!b.data || Object.keys(b.data).length === 0)) {
+                        console.log("working one1");
+
+                        SubmitFlag = 1;
+                    }
+
+                    if (b && b.data && (b.data.address === "" || b.data.name === "" || b.data.port === "")) {
+                        console.log("working newfor bind ");
+
+                        SubmitFlag = 1;
+                    }
+                });
+
+                if (a && a.data) {
+                    if (a.data.name === "" || a.data.mode === "" || a.data.default_backend === "" || (a.data.compression && a.data.compression.algorithms && a.data.compression.algorithms[0] === "")) {
+                        SubmitFlag = 1;
+                        (a.data.compression && a.data.compression.types) && a.data.compression.types.forEach(c => {
+                            if (c === "") {
+                                SubmitFlag = 1;
+                                console.log("working compression ");
+
+                            }
+                        })
+                    }
+                    if (a.data && a.data.http_redirect === true) {
+                        SubmitFlag = 1;
+                        console.log("working ");
+                    }
+                }
+            });
+
+            // if (b && b.data && b.data.ssl_certificate === "") {
+            //     secondnewJsonData[i].bind[j].data.ssl = false;
+            // }
+
+
+            for (let i = 0; i < selectedValues.length; i++) {
+                x = x + selectedValues[i] + " ";
+            }
+            if (x.trim() != "") {
+
+                secondnewJsonData[0].data.compression.types = selectedValues;
+            }
+            console.log("secondJsondata", secondnewJsonData);
+            // console.log("SelectedValues", selectedValues);
+            console.log("SubmitFlag", SubmitFlag);
+
+            if (SubmitFlag == 0) {
+                const requestData = JSON.stringify(secondnewJsonData);
+                console.log("Jsodc", requestData);
+                var csrfToken = "{{ csrf_token() }}";
+                var headers = new Headers();
+                headers.append('Content-Type', 'application/json');
+                headers.append('X-CSRFToken', csrfToken); // Include the CSRF token here
+
+                fetch("/save_frontend", {
+                    method: "POST",
+                    headers: headers,
+                    body: requestData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("message", data.error);
+                        if (data.error == 0) {
+                            alert('Data Saved');
+                            <!-- location.reload(); -->
+                        }
+                        else {
+                            alert(data.message)
+                        }
+                    })
+                    .catch(error => {
+                        // Handle errors
+                        alert("An error occurred while saving data");
+                        // console.error("Error:", error);
+                    });
+            } else {
+                alert("Please enter the feilds and submit ")
+            }
+        }
+
+        function decodeEntities(encodedString) {
+            const textArea = document.createElement('textarea');
+            textArea.innerHTML = encodedString;
+            return textArea.value;
+        }
+        const decodedData = decodeEntities(mydata);
+        const jsonData = JSON.parse(decodedData);
+
+
+
+        const saveButton = document.getElementById('save')
+        saveButton.addEventListener('click', saveInputValues);
+
+        let flag = 0;
+        var bindserverindexcount = 0;
+
+        var newArrayOfServers = []
+
+
+        
+        
+        function addBindServers(BindContainer1, jsonIndex, binddataIndex) {
+
+            const allaclContainer = document.createElement("tr");
+            allaclContainer.style.backgroundColor = "rgb(205, 222, 228)";
+            // const table = document.createElement("table");
+            // table.id = 'newTable';
+            // table.classList.add('newaddtabel');
+            // table.style.borderCollapse = "collapse";
+
+            if (window.innerWidth > 1300) {
+                allaclContainer.style.display = "flex";
+            } else {
+                allaclContainer.style.display = "block";
+            }
+            // allaclContainer.style.justifyContent = "space-between";
+
+            window.addEventListener('resize', function () {
+                const innerWidth = window.innerWidth
+                console.log("innerwidth", innerWidth);
+                if (innerWidth > 1300) {
+                    allaclContainer.style.display = "flex";
+                    // allaclContainer.style.justifyContent = "space-between";
+                }
+                else {
+                    allaclContainer.style.display = "block";
+                }
+            })
+
+            secondnewJsonData[jsonIndex].bind.push({ type: "new", http_redirect: false, data: {} });
+
+            const tableRow = document.createElement("tr");
+            tableRow.style.backgroundColor = "rgb(205, 222, 228)";
+
+
+            const bindAddressCell = document.createElement("td");
+            // bindAddressCell.style.padding = "5px"; // Optional cell padding
+            const inputField1 = document.createElement('input');
+            inputField1.type = "text";
+            inputField1.placeholder = "Enter Address"
+
+            inputField1.classList.add("aclnewInput");
+
+            inputField1.addEventListener('input', function () {
+                event.preventDefault();
+                // newJsonData[jsonIndex].bind[binddataIndex].data.address = inputField1.value;
+                secondnewJsonData[jsonIndex].bind[secondnewJsonData[jsonIndex].bind.length - 1].data.address = inputField1.value;
+            })
+            bindAddressCell.appendChild(inputField1);
+            tableRow.appendChild(bindAddressCell);
+
+
+            const bindNameCell = document.createElement("td");
+            // bindNameCell.style.padding = "5px"; // Optional cell padding
+            const inputField2 = document.createElement('input');
+            inputField2.type = "text";
+            inputField2.placeholder = "Enter the Name"
+            inputField2.classList.add("aclnewInput");
+
+            inputField2.addEventListener('input', function () {
+                event.preventDefault();
+                // newJsonData[jsonIndex].bind[binddataIndex].data.name = inputfield1a.value;
+                secondnewJsonData[jsonIndex].bind[secondnewJsonData[jsonIndex].bind.length - 1].data.name = inputField2.value
+
+            })
+            bindNameCell.appendChild(inputField2);
+            tableRow.appendChild(bindNameCell);
+
+            const portCell = document.createElement("td");
+            // portCell.style.padding = "5px"; // Optional cell padding
+            const inputField3 = document.createElement('input');
+            inputField3.type = "number";
+            inputField3.placeholder = "Enter Port"
+
+            inputField3.classList.add("aclnewInput");
+
+            inputField3.addEventListener('input', function () {
+                event.preventDefault();
+                console.log("helo");
+                // newJsonData[jsonIndex].bind[binddataIndex].data.port = inputField2.value;
+                secondnewJsonData[jsonIndex].bind[secondnewJsonData[jsonIndex].bind.length - 1].data.port = parseInt(inputField3.value);
+            })
+            portCell.appendChild(inputField3);
+            tableRow.appendChild(portCell);
+
+            const sslcertCell = document.createElement("td");
+            // sslcertCell.style.marginLeft = "2%";
+            const inputfieldc = document.createElement('input');
+            inputfieldc.classList.add("aclnewInput");
+            inputfieldc.placeholder = "Enter the path"
+            inputfieldc.name = "sslCertificate";
+            inputfieldc.id = "sslCertificate";
+
+            inputfieldc.addEventListener('input', function () {
+                event.preventDefault();
+                secondnewJsonData[jsonIndex].bind[secondnewJsonData[jsonIndex].bind.length - 1].data.ssl_certificate = inputfieldc.value
+            })
+
+            sslcertCell.appendChild(inputfieldc);
+            tableRow.appendChild(sslcertCell);
+
+            const removeButtonCell = document.createElement("td");
+            removeButtonCell.classList.add("remove-btn");
+            removeButtonCell.style.marginLeft = "2%";
+            removeButtonCell.style.marginTop = "2.5%";
+            removeButtonCell.style.marginBottom = "2%";
+
+            const removeBindButton = document.createElement('i');
+            // removeBindButton.classList.add("remove-btn");
+            removeBindButton.classList.add('fas', 'fa-trash', 'fa-sm');
+            removeBindButton.classList.add('btn', 'btn-danger', 'mb-2');
+            removeBindButton.classList.add('btn', 'btn-danger', 'remove-btn');
+
+            removeBindButton.addEventListener('click', function () {
+                event.preventDefault();
+                var csrfToken = "{{ csrf_token() }}";
+                var headers = new Headers();
+                headers.append('Content-Type', 'application/json');
+                headers.append('X-CSRFToken', csrfToken); // Include the CSRF token here
+
+                if (window.confirm("Are you want to delete")) {
+
+                    fetch('/delete_bind', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify({ frontend: secondnewJsonData[i].data.name, bind: inputfield1a.value }), // Send the backend name to delete
+                    })
+                        .then(response => {
+                            if (response.status === 200) {
+                                alert(" bind Successfully deleted")
+                                window.location.reload(true);
+                            } else if (response.status === 404) {
+                                // Backend not found
+                                // Handle error
+                                console.error('bind not found');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Handle other errors
+                        });
+                    BindContainer1.removeChild(allaclContainer);
+                }
+            });
+            removeButtonCell.appendChild(removeBindButton);
+            tableRow.appendChild(removeButtonCell);
+
+            BindContainer1.appendChild(tableRow);
+            // BindContainer1.appendChild(allaclContainer);
+            // allaclContainer.appendChild(BindContainer1);
+            const breakpoint = document.createElement("br");
+
+        }
+
+        for (let i = 0; i < 1; i++) {
+
+            console.log("jsondata from api", jsonData);
+            // secondnewJsonData.push({});
+
+            if (i >= secondnewJsonData.length) {
+                secondnewJsonData.push({ type: "old", http_redirect: false, bind: [], data: { default_backend: "", mode: "", name: "" } });
+            }
+            const containerDiv = document.createElement('div');
+            // containerDiv.classList.add('grid-container');
+            var hrElement = document.createElement("hr");
+            containerDiv.appendChild(hrElement);
+
+            const frontend = jsonData;
+            const bind = jsonData[i].bind;
+
+            const totalFrontendContainer = document.createElement("div");
+            totalFrontendContainer.classList.add("frontend-container");
+
+            const frontendLabelDiv = document.createElement("div");
+            frontendLabelDiv.classList.add("frontend-label");
+            frontendLabelDiv.style.fontSize = "16px";
+            const label = document.createElement('label');
+            label.textContent = "FrontEnd: ";
+            // label.classList.add("frontend-label");
+            label.classList.add("fronendLabel");
+
+            frontendLabelDiv.appendChild(label);
+
+            const FrontendInputDiv = document.createElement("div");
+            FrontendInputDiv.classList.add("frontend-input");
+            const nameInput = document.createElement("input");
+            nameInput.type = "text";
+            nameInput.classList.add("frontend-input")
+            nameInput.disabled = true;
+
+            FrontendInputDiv.appendChild(nameInput);
+
+            var y = 0;
+            frontend.map((x, index) => {
+                if (x.frontend.name === "f_new") {
+                    y = index;
+                }
+            })
+            nameInput.value = jsonData && jsonData[y] && jsonData[y].frontend && jsonData[y].frontend.name
+
+            if (jsonData && jsonData[y] && jsonData[y].frontend && jsonData[y].frontend.name != "") {
+                secondnewJsonData[i].data.name = nameInput.value;
+            }
+
+            totalFrontendContainer.appendChild(frontendLabelDiv);
+            totalFrontendContainer.appendChild(FrontendInputDiv);
+
+            nameInput.addEventListener('input', function () {
+                event.preventDefault();
+                newJsonData[i].frontend.name = nameInput.value
+                if (nameInput.value.trim() != "") {
+                    secondnewJsonData[i].data.name = nameInput.value;
+                }
+            })
+            containerDiv.appendChild(totalFrontendContainer);
+
+            //  if (jsonData[i].frontend.compression && jsonData[i].frontend.compression.algorithms && jsonData[i].frontend.compression.types) {  
+
+
+            const totalcompression = document.createElement("div");
+            totalcompression.classList.add("allcompressionlabel");
+
+            const compressionSection = document.createElement("div");
+            compressionSection.style.display = "flex";
+
+            const compressionLabelDiv = document.createElement("div");
+            compressionLabelDiv.classList.add("compression-lable");
+
+            const Compressionlabel = document.createElement("label");
+            Compressionlabel.textContent = "Compression:";
+            Compressionlabel.classList.add("compressionLabel");
+
+            compressionLabelDiv.appendChild(Compressionlabel);
+
+            const CAcontainer = document.createElement("div");
+            CAcontainer.appendChild(document.createElement("br"));
+
+
+            const compressionLabelSelectDiv = document.createElement("div");
+
+            const compressionSelect = document.createElement("select");
+            compressionSelect.name = "field";
+            compressionSelect.classList.add("bindaddressInput");
+            // compressionSelect.value = "Yes";
+            // console.log("compression",compressionSelect.value);
+            // jsonData[i].bind.data[j].Compressionlabel = newSelect1.value;
+
+            const option3a = document.createElement("option");
+            option3a.value = "";
+            option3a.text = "Select Option";
+
+            const option3 = document.createElement("option");
+            option3.value = "Yes";
+            option3.text = "Yes";
+
+            const option4 = document.createElement("option");
+            option4.value = "No";
+            option4.text = "No";
+
+            if (jsonData[i].frontend.compression && jsonData[i].frontend.compression.algorithms.length > 0 && jsonData[i].frontend.compression && jsonData[i].frontend.compression.types.length > 0) {
+                option3.selected = true;
+
+            } else {
+                option4.selected = true;
+            }
+
+            compressionSelect.appendChild(option3a);
+            compressionSelect.appendChild(option3);
+            compressionSelect.appendChild(option4);
+
+            const lineBreak1 = document.createElement("div");
+            compressionSelect.appendChild(document.createElement("br"));
+
+            compressionLabelSelectDiv.appendChild(compressionSelect);
+
+            compressionSection.appendChild(compressionLabelDiv);
+            compressionSection.appendChild(compressionLabelSelectDiv);
+
+            totalcompression.appendChild(compressionSection);
+
+            containerDiv.appendChild(totalcompression);
+
+
+            // CAcontainer.appendChild(document.createElement("br"));
+
+            const compressionalgoSection = document.createElement("div");
+            compressionalgoSection.classList.add("compression-section");
+
+            const compressionAlgorithmDiv = document.createElement("div");
+            compressionAlgorithmDiv.classList.add("compression-lable");
+
+            const CompressionAlgolabel = document.createElement("label");
+            CompressionAlgolabel.textContent = "Compression Algo:";
+            CompressionAlgolabel.classList.add("compressionLabel");
+
+            compressionAlgorithmDiv.appendChild(CompressionAlgolabel);
+
+            const compressionalgoSelectDiv = document.createElement("div");
+
+            const newSelect2 = document.createElement("select");
+            newSelect2.classList.add("bindaddressInput");
+            newSelect2.name = "field";
+
+            const option5a = document.createElement("option");
+            option5a.value = "";
+            option5a.text = "Select Option";
+
+            const option5 = document.createElement("option");
+            option5.value = "gzip";
+            option5.text = "gzip";
+
+            const option6 = document.createElement("option");
+            option6.value = "deflate";
+            option6.text = "deflate";
+
+            const option7 = document.createElement("option");
+            option7.value = "raw-deflate";
+            option7.text = "raw-deflate";
+
+            newSelect2.appendChild(option5a);
+            newSelect2.appendChild(option5);
+            newSelect2.appendChild(option6);
+            newSelect2.appendChild(option7);
+
+            compressionalgoSelectDiv.appendChild(newSelect2);
+            // secondnewJsonData[i].data.compression = jsonData[i].frontend.compression.algorithms[i];
+
+
+            const apiValue = jsonData[i].frontend.compression && jsonData[i].frontend.compression.algorithms && jsonData[i].frontend.compression.algorithms[0];
+
+            newSelect2.value = jsonData[i].frontend.compression && jsonData[i].frontend.compression.algorithms && jsonData[i].frontend.compression.algorithms[0];
+            console.log("before value", newSelect2.value);
+
+            // newSelect2.value = jsonData[i].frontend.compression && jsonData[i].frontend.compression.algorithms[i];
+            if (compressionSelect.value.trim() === "Yes") {
+                secondnewJsonData[i].data.compression = {};
+                secondnewJsonData[i].data.compression = { algorithms: [], types: [] }
+                const algorithmValue = apiValue !== null && apiValue !== undefined ? apiValue : "";
+
+                secondnewJsonData[i].data.compression.algorithms[i] = algorithmValue;
+                // console.log("algovalues new ", secondnewJsonData[i].data.compression.algorithms[i] = jsonData[i].frontend.compression && jsonData[i].frontend.compression.algorithms[i]
+
+            }
+            // console.log("Value from jsonData", jsonData[i].frontend.compression.algorithms[i]);
+            newSelect2.addEventListener("change", function () {
+                event.preventDefault();
+                const selectedValue = newSelect2.value.trim();
+
+                if (selectedValue != "" && selectedValue !== undefined) {
+                    secondnewJsonData[i].data.compression = { algorithms: [], types: [] };
+
+                    secondnewJsonData[i].data.compression.algorithms[i] = selectedValue;
+                }
+            })
+
+
+            for (let option of newSelect2.options) {
+                if (option.value === jsonData[i]?.frontend?.compression?.algorithms && jsonData[i].frontend.compression.algorithms[0]) {
+                    option.selected = true;
+                }
+            }
+            compressionalgoSelectDiv.appendChild(newSelect2);
+            compressionAlgorithmDiv.appendChild(compressionalgoSelectDiv);
+
+            CAcontainer.appendChild(CompressionAlgolabel);
+            CAcontainer.appendChild(newSelect2);
+            CAcontainer.appendChild(document.createElement("br"));
+
+            if (compressionSelect.value.trim() == "Yes") {
+                // CAcontainer.style.display = "block";
+                totalcompression.appendChild(CAcontainer);
+            }
+            compressionSelect.addEventListener('change', function () {
+                event.preventDefault();
+                if (compressionSelect.value.trim() == "Yes") {
+                    //    <!-- secondnewJsonData[i].data.compression = { algorithms: [], types: [] }; -->
+                    totalcompression.appendChild(CAcontainer);
+                }
+                else {
+                    delete secondnewJsonData[i].data.compression;
+                    totalcompression.removeChild(CAcontainer);
+                }
+                // jsonData[i].bind.data[j].Compressionlabel = newSelect1.value;
+            });
+
+
+            const lineBreak = document.createElement("div");
+            compressionalgoSection.appendChild(document.createElement("br"));
+
+
+            CAcontainer.appendChild(compressionalgoSection);
+            compressionalgoSection.appendChild(compressionAlgorithmDiv);
+            compressionalgoSection.appendChild(compressionalgoSelectDiv);
+
+            const CompressionTypeContent = document.createElement("div");
+            CompressionTypeContent.id = "CompressionTypeContent";
+            CompressionTypeContent.classList.add("flex-item");
+
+            // CompressionTypeContent.style.display = "none";
+
+            const labelType = document.createElement("label");
+            labelType.textContent = "Compression Type:";
+            labelType.classList.add("form-label");
+
+            CompressionTypeContent.appendChild(labelType);
+
+            // Checkbox inputs for Compression Type
+            const types = ["text/css", "text/html", "text/javascript", "application/javascript", "text/plain", "text/xml", "application/json"];
+
+
+            var typesArray = new Set();
+            jsonData && jsonData[i] && jsonData[i].frontend && jsonData[i].frontend.compression && jsonData[i].frontend.compression.types.map(x => {
+                typesArray.add(x);
+            })
+            if (compressionSelect.value.trim() === "Yes") {
+                secondnewJsonData[i].data.compression.types = typesArray
+                console.log("secondnewJsonData[i].data.compression.types", secondnewJsonData[i].data.compression.types);
+
+                secondnewJsonData[i].data.compression.types = Array.from(typesArray);
+
+                // console.log("secondnewJsonData[i].data.compression.types",secondnewJsonData[i].data.compression.types);
+            }
+            const brElement1 = document.createElement("br");
+            for (const type of types) {
+                const input = document.createElement("input");
+                input.type = "checkbox";
+                input.name = "Versions1";
+                input.value = type;
+                input.classList.add("form-check-input");
+
+                if (jsonData[i].frontend.compression && Array.isArray(jsonData[i].frontend.compression.types) && jsonData[i].frontend.compression.types.includes(type)) {
+                    // console.log("types valyes", jsonData[i].frontend.compression.types)
+
+                    input.checked = true;
+                }
+                // secondnewJsonData[i].data.compression.types = jsonData[i].frontend.compression && jsonData[i].frontend.compression.types;
+                input.addEventListener("change", function () {
+                    if (this.checked) {
+                        var typeflag = 0;
+                        secondnewJsonData[i].data.compression && secondnewJsonData[i].data.compression.types && secondnewJsonData[i].data.compression.types.map(x => {
+                            if (this.value == x) {
+                                typeflag = 1;
+                            }
+                        })
+                        if (secondnewJsonData[i].data.compression.types === undefined) {
+                            secondnewJsonData[i].data.compression.types = []
+                        }
+                        if (typeflag === 0) {
+                            secondnewJsonData[i].data.compression.types.push(this.value);
+                        }
+                        // selectedValues.push(this.value);
+                    } else {
+                        // Checkbox is unchecked, remove its value from the selectedValues array
+                        const index = secondnewJsonData[i].data.compression.types.indexOf(this.value);
+                        if (index !== -1) {
+                            secondnewJsonData[i].data.compression.types.splice(index, 1);
+                        }
+                    }
+                    secondnewJsonData[i].data.compression.types = Array.from(secondnewJsonData[i].data.compression.types);
+
+                });
+                // console.log("types selected valuesnew ", secondnewJsonData[i].data.compression.types)
+
+                const textNode = document.createTextNode(type);
+                CompressionTypeContent.appendChild(input);
+                CompressionTypeContent.appendChild(textNode);
+                CompressionTypeContent.appendChild(brElement1);
+            }
+
+            CAcontainer.appendChild(CompressionTypeContent);
+            containerDiv.appendChild(brElement1);
+
+            const totalModeAndHttpsContainer = document.createElement("div");
+            totalModeAndHttpsContainer.style.display = "flex";
+
+            const totalModeContainer = document.createElement("div");
+            totalModeContainer.classList.add("mode-container");
+
+            const ModeLabelDiv = document.createElement("div");
+            ModeLabelDiv.classList.add("mode-label");
+
+            const Modelabel = document.createElement("label");
+            Modelabel.textContent = "Mode:";
+            // Modelabel.classList.add("mode-label");
+            Modelabel.classList.add("fronendLabel");
+
+            ModeLabelDiv.appendChild(Modelabel);
+
+            const ModeSelectDiv = document.createElement("div");
+
+            const newSelect = document.createElement("Select");
+            newSelect.name = "field";
+            newSelect.classList.add("mode-select");
+            newSelect.text = jsonData[i].frontend.mode
+            newSelect.value = jsonData && jsonData[i] && jsonData[i].frontend && jsonData[i].frontend.mode;
+
+            const apiValue2 = jsonData && jsonData[i] && jsonData[i].frontend && jsonData[i].frontend.mode;
+            newSelect.value = apiValue2;
+
+            ModeSelectDiv.appendChild(newSelect);
+
+            const option1 = document.createElement("option");
+            option1.value = jsonData[i].frontend.mode.toUpperCase() == "TCP" ? "TCP" : "HTTP";
+            option1.text = jsonData[i].frontend.mode.toUpperCase() == "TCP" ? "TCP" : "HTTP";
+
+            const option2 = document.createElement("option");
+            option2.value = option1.value == "TCP" ? "HTTP" : "TCP";
+            option2.text = option1.value == "TCP" ? "HTTP" : "TCP";
+
+            secondnewJsonData[i].data.mode = jsonData && jsonData[i] && jsonData[i].frontend && jsonData[i].frontend.mode;
+            console.log("value", newSelect.value);
+            if (jsonData[i].frontend.mode != "") {
+                secondnewJsonData[i].data.mode = jsonData && jsonData[i] && jsonData[i].frontend && jsonData[i].frontend.mode.toLowerCase();
+            }
+
+            secondnewJsonData[i].data.mode = jsonData && jsonData[i] && jsonData[i].frontend && jsonData[i].frontend.mode;
+            // console.log("After Mode the value");
+
+            newSelect.value = jsonData && jsonData[i] && jsonData[i].frontend && jsonData[i].frontend.mode;
+
+            console.log("Value from jsonData", jsonData[i].frontend.mode);
+            newSelect.addEventListener('change', function () {
+                event.preventDefault();
+                const selectedMode = newSelect.value.toLowerCase();
+                if (selectedMode === "http") {
+                    newSelect3.disabled = false;
+                } else {
+                    newSelect3.disabled = true;
+                    newSelect3.value = "";
+                    secondnewJsonData[i].http_redirect = false;
+                    newJsonData[i].data.mode = newSelect.value
+                    if (newSelect.value.trim() != "") {
+                        secondnewJsonData[i].data.mode = newSelect.value.toLowerCase();
+                    }
+
+                }
+            });
+
+            newSelect.appendChild(option1);
+            newSelect.appendChild(option2);
+            for (let option of newSelect.options) {
+                if (option.value === apiValue2) {
+                    option.selected = true;
+                }
+            }
+            totalModeContainer.appendChild(ModeLabelDiv);
+            totalModeContainer.appendChild(ModeSelectDiv);
+
+
+            totalModeAndHttpsContainer.appendChild(totalModeContainer);
+
+
+            const totalhttpsredirect = document.createElement("div");
+            totalhttpsredirect.style.display = "flex";
+            totalhttpsredirect.style.marginTop = "2%";
+            totalhttpsredirect.style.marginLeft = "2%";
+
+            const httpsLabelDiv = document.createElement("div");
+            httpsLabelDiv.classList.add("https-label");
+
+            const httpsLabel = document.createElement("label");
+            httpsLabel.textContent = "Https Redirection:";
+            httpsLabel.classList.add("fronendLabel");
+
+            httpsLabelDiv.appendChild(httpsLabel);
+
+            const httpsSelectDiv = document.createElement("div");
+
+            const newSelect3 = document.createElement("select");
+            newSelect3.name = "field";
+            newSelect3.classList.add("sslnewInput");
+
+
+            const optiona = document.createElement("option");
+            optiona.value = "";
+            optiona.text = "Select Option";
+
+            const optionb = document.createElement("option");
+            optionb.value = true;
+            optionb.text = "True";
+
+            const optionc = document.createElement("option");
+            optionc.value = false;
+            optionc.text = "False";
+
+            // newJsonData[i].http_redirect = jsonData[y].http_redirect
+
+            secondnewJsonData[i].http_redirect = jsonData && jsonData[i] && jsonData[i].http_redirect;
+
+
+            newSelect3.value = jsonData && jsonData[i] && jsonData[i].http_redirect && jsonData[i].http_redirect;
+            console.log("Value from jsonData", jsonData[i].http_redirect);
+            newSelect3.addEventListener('change', function () {
+                event.preventDefault();
+
+                if (newSelect3.value.trim() !== "") {
+                    secondnewJsonData[i].http_redirect = newSelect3.value === "true";
+                    console.log("Updated secondnewJsonData:", secondnewJsonData);
+                    // <!--secondnewJsonData[i].http_redirect = Boolean(newSelect3.value) -->
+                }
+            })
+            const initialSelectedMode = newSelect.value.toLowerCase();
+            if (initialSelectedMode === "http") {
+                newSelect3.disabled = false;
+            } else {
+                newSelect3.disabled = true;
+                newSelect3.value = "";
+                secondnewJsonData[i].http_redirect = false;
+            }
+            newSelect3.appendChild(optiona);
+            newSelect3.appendChild(optionb);
+            newSelect3.appendChild(optionc);
+            const apiValue3 = jsonData[i].http_redirect;
+            newSelect3.value = apiValue3;
+            httpsSelectDiv.appendChild(newSelect3);
+
+            for (let option of newSelect3.options) {
+                if (option.value === apiValue3) {
+                    option.selected = true;
+                }
+            }
+            totalhttpsredirect.appendChild(httpsLabelDiv)
+            totalhttpsredirect.appendChild(httpsSelectDiv)
+
+            totalModeAndHttpsContainer.appendChild(totalhttpsredirect);
+
+            containerDiv.appendChild(totalModeAndHttpsContainer);
+
+            const totaldefaultContainer = document.createElement("div");
+            totaldefaultContainer.classList.add("default-container");
+            // totalhttpsredirect.style.marginLeft = "2%";
+
+            const defaultbackendLabelDiv = document.createElement("div");
+            defaultbackendLabelDiv.classList.add("default-label");
+
+            const defaultbackendLabel = document.createElement("label");
+            defaultbackendLabel.textContent = "Default Backend:";
+            defaultbackendLabel.classList.add("fronendLabel");
+
+            defaultbackendLabelDiv.appendChild(defaultbackendLabel);
+
+            const defaultbackendinput = document.createElement("div");
+            defaultbackendinput.style.marginLeft = "2%";
+            defaultbackendinput.style.marginRight = "2%";
+            // bindinputDiv.style.marginRight = "10%";
+
+            const inputfield1a = document.createElement('input');
+            inputfield1a.type = "text";
+            inputfield1a.classList.add("defaultinput");
+            inputfield1a.value = jsonData && jsonData[i] && jsonData[i].frontend && jsonData[i].frontend.default_backend;
+
+
+            const defaultapiValue = jsonData && jsonData[i] && jsonData[i].frontend && jsonData[i].frontend.default_backend;
+            inputfield1a.value = defaultapiValue ? defaultapiValue : "";
+
+            defaultbackendinput.appendChild(inputfield1a);
+
+            if (jsonData[y].frontend.default_backend !== "") {
+                secondnewJsonData[i].data.default_backend = inputfield1a.value;
+            }
+            console.log("jsonData[y].frontend.default_backend", jsonData[y].frontend.default_backend);
+            totaldefaultContainer.appendChild(defaultbackendLabelDiv);
+            totaldefaultContainer.appendChild(defaultbackendinput);
+
+            console.log("previous value of default is", inputfield1a.value)
+
+            inputfield1a.addEventListener('input', function () {
+                event.preventDefault();
+                // newJsonData[i].frontend[y].default_backend = inputfield1a.value
+                if (inputfield1a.value.trim() != "") {
+                    console.log("previous value of  is", inputfield1a.value)
+                    secondnewJsonData[i].data.default_backend = inputfield1a.value;
+                } else {
+                    delete secondnewJsonData[i].data.default_backend;
+                }
+
+            })
+            console.log("outside the value is", secondnewJsonData[i].data.default_backend);
+
+            containerDiv.appendChild(totaldefaultContainer);
+            containerDiv.appendChild(document.createElement("br"));
+
+            // tabel structure for the labels
+            // for (let k = 0; k < 1; k++) {
+            //     const sslSection = document.createElement("div");
+            //     sslSection.style.display = "flex";
+
+            //     const ssltotal = document.createElement("div");
+            //     ssltotal.style.display = "flex"
+            //     const ssllableDiv = document.createElement("div");
+
+            //     const ssllabel = document.createElement("label");
+            //     ssllabel.textContent = "SSL :";
+            //     ssllabel.classList.add("sslnewLabel");
+
+            //     ssllableDiv.appendChild(ssllabel);
+
+            //     const sslSelectDiv = document.createElement("div");
+
+            //     const newSelect3 = document.createElement("select");
+            //     newSelect3.name = "field";
+            //     newSelect3.classList.add("sslnewInput");
+
+            //     const optiona = document.createElement("option");
+            //     optiona.value = "";
+            //     optiona.text = "Select Option";
+
+            //     const optionb = document.createElement("option");
+            //     optionb.value = "True";
+            //     optionb.text = "True";
+
+            //     const optionc = document.createElement("option");
+            //     optionc.value = "False";
+            //     optionc.text = "False";
+
+            //     newSelect3.appendChild(optiona);
+            //     newSelect3.appendChild(optionb);
+            //     newSelect3.appendChild(optionc);
+            //     sslSelectDiv.appendChild(newSelect3);
+
+            //     ssltotal.appendChild(ssllableDiv)
+            //     ssltotal.appendChild(sslSelectDiv)
+
+            //     sslSection.appendChild(ssltotal);
+
+            //     containerDiv.appendChild(sslSection);
+
+            //     newSelect3.addEventListener('change', function () {
+            //         event.preventDefault();
+            //         secondnewJsonData.runtime_apis = [];
+            //         secondnewJsonData.runtime_apis.push({});
+            //         newSelect3.value = jsonData[y].bind.data[j].ssl;
+            //         // secondnewJsonData[i].bind[j].data.ssl = jsonData[y].bind.data[j].ssl;
+            //         secondnewJsonData[i].bind[j].data.ssl = newSelect3.value.trim() == "True" ? true : false;
+            //         if (newSelect3.value.trim() == "True") {
+            //             sslSection.appendChild(sslcrtficateSection);
+            //             containerDiv.appendChild(tlsSection);
+            //             containerDiv.appendChild(cipherSection);
+
+            //         }
+            //         else {
+            //             sslSection.removeChild(sslcrtficateSection);
+            //             containerDiv.removeChild(tlsSection);
+            //             // containerDiv.removeChild(totalcipherContainer);
+            //             // containerDiv.removeChild(cipherSection);
+
+            //         }
+            //     })
+            //     const sslcrtficateSection = document.createElement("div");
+            //     sslcrtficateSection.style.display = "flex";
+            //     sslcrtficateSection.style.marginLeft = "2%";
+            //     // sslcrtficateSection.style.marginTop = "2.5%";
+
+            //     const sslcertlableDiv = document.createElement("div");
+            //     sslcertlableDiv.style.marginLeft = "2%";
+
+            //     const sslcertlabel = document.createElement("label");
+            //     sslcertlabel.textContent = "SSL Certificate:";
+            //     // sslcertlabel.classList.add("ssl-label");
+            //     sslcertlabel.classList.add("sslnewLabel");
+
+            //     sslcertlableDiv.appendChild(sslcertlabel);
+
+            //     const sslcertDinputDiv = document.createElement("div");
+            //     sslcertDinputDiv.style.marginLeft = "2%";
+            //     sslcertDinputDiv.style.marginRight = "2%";
+
+            //     const inputfield1 = document.createElement('textarea');
+            //     // inputfield1.type = "textarea";
+            //     inputfield1.classList.add("sslcertnewInput");
+            //     inputfield1.name = "sslCertificate";
+            //     inputfield1.id = "sslCertificate";
+
+            //     inputfield1.value = jsonData[y].bind.data[j].ssl_certificate;
+            //     secondnewJsonData[i].bind[j].data.ssl_certificate = jsonData[y].bind.data[j].ssl_certificate;
+            //     // inputfield1.rows = 4; // You can set the number of rows as needed
+            //     // inputfield1.cols = 50;
+
+            //     sslcertDinputDiv.appendChild(inputfield1);
+
+            //     sslcrtficateSection.appendChild(sslcertlabel);
+            //     sslcrtficateSection.appendChild(sslcertDinputDiv);
+
+
+            //     inputfield1.addEventListener('input', function () {
+            //         event.preventDefault();
+            //         secondnewJsonData[i].bind[j].data.ssl_certificate = inputfield1.value;
+
+            //     })
+
+            // }
+            const serverTable = document.createElement('table');
+            serverTable.id = 'serverTable';
+            serverTable.classList.add('table');
+
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            headerRow.style.marginLeft = '2%';
+            const headerLabels = ['Bind Address', 'Bind Name', 'Bind Port', 'SSL Crt'];
+            for (const label of headerLabels) {
+                const th = document.createElement('th');
+                th.classList.add('heardersforbind');
+                th.style.marginLeft = '20px';
+                th.textContent = label + ' ';
+                // const helpIcon = document.createElement('span');
+                // helpIcon.classList.add('fonticonhelp');
+                // helpIcon.dataset.popup2 = "KE9wdGlvbmFsKSBTZXQgZmlyZXdhbGwgcnVsZXMgZm9yIHlvdXIgTG9hZCBCYWxhbmNlci4gUGxlYXNlIG5vdGUgcG9ydCByYW5nZSA2NTMwMCB0byA2NTMxMCBhcmUgdXNlZCBpbnRlcm5hbGx5LiBTcGVjaWZ5ICJjbG91ZGZsYXJlIiBhcyB5b3VyIHNvdXJjZSB0byB1dGlsaXplIENsb3VkZmxhcmUgSVBzLg==";
+                // helpIcon.dataset.originalTitle = " Set firewall rules for your Load Balancer. Please note port range 65300 to 65310 are used internally. Specify 'cloudflare' as your source to utilize Cloudflare IPs.";
+                // helpIcon.textContent = '?';
+
+                // th.appendChild(helpIcon);
+                headerRow.appendChild(th);
+            }
+            thead.appendChild(headerRow);
+            serverTable.appendChild(thead);
+            // removeBindButton.textContent = 'Delete';
+
+            // removeBindButton.addEventListener('click', function (event) {
+            //     event.preventDefault();
+            function handleDelete(event, i, j) {
+                event.preventDefault();
+                var csrfToken = "{{ csrf_token() }}";
+                var headers = new Headers();
+                headers.append('Content-Type', 'application/json');
+                headers.append('X-CSRFToken', csrfToken);
+
+                if (window.confirm("Are you sure you want to delete?")) {
+                    fetch('/delete_bind', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify({ frontend: secondnewJsonData[i].data.name, bind: secondnewJsonData[i].bind[j].data.name }),
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                // Remove the deleted row from the table visually
+                                const table = document.getElementById('serverTable');
+                                table.deleteRow(j + 1);
+                                secondnewJsonData[i].bind.splice(j, 1);
+                                alert("Record deleted Successfully");
+
+                            } else {
+                                console.error('Error:', response.statusText);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Handle errors
+                        });
+
+                    // secondnewJsonData[i].bind.splice(j, 1);
+                    // containerDiv.appendChild(serverTable);
+                    // containerDiv.removeChild(serverTable);
+
+                    // tableRow.removeChild(serverTable);
+                }
+            };
+            function createDeleteButton(tableRow, i, j, containerDiv) {
+                const removeButtonCell = document.createElement('td');
+                const removeBindButton = document.createElement('button');
+                removeBindButton.classList.add('fas', 'fa-trash', 'fa-sm');
+                removeBindButton.classList.add('btn', 'btn-danger', 'mb-2');
+                removeBindButton.classList.add('btn', 'btn-danger', 'remove-btn');
+
+                removeBindButton.addEventListener('click', (event) => {
+                    handleDelete(event, i, j);
+                });
+                removeButtonCell.appendChild(removeBindButton);
+                tableRow.appendChild(removeButtonCell);
+            }
+
+            for (let j = 0; j < jsonData[y].bind.data.length; j++) {
+                secondnewJsonData[i].bind.push({ type: "old", data: { ssl: false } })
+                const tableRow = document.createElement('tr');
+                tableRow.style.backgroundColor = "rgb(205, 222, 228)";
+                tableRow.style.borderRadius = "8px";
+
+                const bindAddressCell = document.createElement('td');
+                const inputField = document.createElement('input');
+                inputField.type = "text";
+                inputField.value = jsonData[y].bind.data[j].address;
+                console.log("bind address is", jsonData[y].bind.data[j].address);
+                secondnewJsonData[i].bind[j].data.address = inputField.value;
+
+
+                console.log("Index j:", j);
+                console.log("secondnewJsonData is like this:", secondnewJsonData);
+                console.log("addresss", secondnewJsonData[i].bind[j].data.address);
+                inputField.classList.add("aclnewInput");
+                bindAddressCell.appendChild(inputField);
+                tableRow.appendChild(bindAddressCell);
+
+                const bindNameCell = document.createElement('td');
+                const inputField1 = document.createElement('input');
+                inputField1.type = "text";
+
+                secondnewJsonData[i].bind[j].data.name = jsonData[y]?.bind?.data[j]?.name; // Assign other values similarly
+                inputField1.value = jsonData[y]?.bind?.data[j]?.name;
+
+                console.log("addresss for name", secondnewJsonData[i].bind[j].data.name);
+
+                inputField1.classList.add("aclnewInput");
+                bindNameCell.appendChild(inputField1);
+                tableRow.appendChild(bindNameCell);
+
+                const bindPortCell = document.createElement('td');
+                const inputField2 = document.createElement('input');
+                inputField2.type = "text";
+
+                // try {
+                secondnewJsonData[i].bind[j].data.port = jsonData[y].bind.data[j].port;
+                inputField2.value = jsonData[y].bind.data[j].port;
+
+                // } catch (e) { }
+                console.log("addresss for port", secondnewJsonData[i].bind[j].data.port);
+
+                inputField2.classList.add("aclnewInput");
+                bindPortCell.appendChild(inputField2);
+                tableRow.appendChild(bindPortCell);
+
+
+                const sslcertCell = document.createElement("td");
+                sslcertCell.style.marginLeft = "2%";
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+
+                if (newSelect.value.trim().toLowerCase() === "http") {
+                    checkbox.disabled = false; // Enable the checkbox
+                } else if (newSelect.value.trim().toLowerCase() === "tcp") {
+                    checkbox.disabled = true;  // Disable the checkbox
+                } else {
+                    // Handle other cases if needed
+                }
+                // Add event listener to checkbox
+
+                const inputfieldc = document.createElement('input');
+                inputfieldc.classList.add("aclnewInput");
+                inputfieldc.placeholder = "Enter the path"
+                inputfieldc.name = "sslCertificate";
+                inputfieldc.id = "sslCertificate";
+                inputfieldc.disabled = true;
+                if (jsonData[y] && jsonData[y].bind && jsonData[y].bind.data && jsonData[y].bind.data[j]) {
+
+                    inputfieldc.value = jsonData[y].bind.data[j].ssl_certificate || '';
+                } else {
+                    console.error("Error: jsonData structure does not exist or is incorrect.");
+
+                }
+                secondnewJsonData[i].bind[j].data.ssl_certificate = jsonData[y].bind.data[j].ssl_certificate;
+
+                if (inputfieldc.value !== '') {
+                    secondnewJsonData[i].bind[j].data.ssl = true; // Set ssl to true if inputfieldc is not empty
+                    secondnewJsonData[i].bind[j].data.ssl_certificate = inputfieldc.value;
+                } else {
+                    delete secondnewJsonData[i].bind[j].data.ssl_certificate;
+                    secondnewJsonData[i].bind[j].data.ssl = false;
+                }
+                console.log("val---------------- ", inputfieldc.value)
+
+                checkbox.addEventListener('change', function () {
+                    inputfieldc.disabled = !this.checked;
+                });
+
+                inputfieldc.addEventListener('input', function () {
+                    event.preventDefault();
+
+                    if (inputfieldc.value !== undefined && inputfieldc.value !== '') {
+                        secondnewJsonData[i].bind[j].data.ssl = true; // Update ssl value if inputfieldc is not empty
+                        secondnewJsonData[i].bind[j].data.ssl_certificate = inputfieldc.value;
+
+                        console.log("data is:", secondnewJsonData);
+                    } else {
+                        delete secondnewJsonData[i].bind[j].data.ssl_certificate;
+                        secondnewJsonData[i].bind[j].data.ssl = false;
+                    }
+                })
+                sslcertCell.appendChild(checkbox);
+
+                sslcertCell.appendChild(inputfieldc);
+                tableRow.appendChild(sslcertCell);
+
+                createDeleteButton(tableRow, i, j, containerDiv);
+                // serverTable.appendChild(sslContainerDiv);
+                serverTable.appendChild(tableRow);
+            }
+
+            const addBindButton = document.createElement('button');
+            addBindButton.textContent = '+ Add Bind';
+            addBindButton.classList.add('btn', 'btn-primary', 'mb-2');
+
+            // Add an event listener to the button
+            addBindButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                // serverTable.appendChild(document.createElement('br'));
+                addBindServers(serverTable, i);
+
+            });
+            containerDiv.appendChild(document.createElement('br'));
+
+            containerDiv.appendChild(addBindButton);
+            containerDiv.appendChild(serverTable);
+            containerDiv.appendChild(document.createElement('br'));
+
+            console.log("Updated secondnewJsonData:", secondnewJsonData);
+
+            document.getElementById('frontendContainer').appendChild(containerDiv);
+        }
+
+    </script>
+    <script src="../static/scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/@ant-design/icons@4.6.2%22"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+</body>
+
+</html>

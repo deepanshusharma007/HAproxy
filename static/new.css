@@ -1,0 +1,10 @@
+.flex-container{
+    display: flex;
+}
+.label-div {
+    margin-right: 10px;
+}
+
+.form-control {
+    width: 100%;
+}

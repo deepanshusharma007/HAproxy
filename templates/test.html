@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="bootstrap5.min.css">
+    <link rel="stylesheet" href="index.css">-->
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap5.min.css') }}">
+    <title>HAPROXY LB</title>
+    <!-- <link rel="stylesheet" href="HA-Proxy/bootstrap/bootstrap-2.css"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='index1.css') }}">
+
+</head>
+
+<body>
+
+    <button type="button" id="submitBtn" class="btn btn-primary">Save</button>
+
+
+</body>
+
+<script>
+    document.getElementById("submitBtn").addEventListener("click", function () {
+
+        data = {
+            "connect_timeout": 1,
+            "client_timeout": 2,
+            "server_timeout": 3,
+            "httplog": 4,
+            "name": "main_default"
+        };
+
+        var csrfToken = "{{ csrf_token() }}";
+        var headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('X-CSRFToken', csrfToken); // Include the CSRF token here
+
+
+
+        fetch('/save_test', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (response.ok) {
+
+                    window.location.reload(true);
+                    return response.json();
+                } else {
+                    throw new Error('Request failed with status: ' + response.status);
+                }
+            })
+            .then(data => {
+                console.log(data);
+                alert('Data Saved');
+            })
+            .catch(error => {
+                alert('Fetch Error');
+                console.error('Error:', error);
+            });
+    });
+</script>
+
+</html>
